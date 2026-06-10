@@ -1,0 +1,48 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Audit-Log</h1>
+  </div>
+  <div class="page-head-actions"></div>
+</div>
+
+<main>
+  <p class="hint">
+    Append-only Änderungs-Protokoll für Invoice, Person, Company, Project, Product.
+    Einträge sind unveränderlich (§131 BAO / §146 AO / GeBüV Art. 958f).
+    Maximal 500 neueste Einträge angezeigt.
+  </p>
+
+  <div class="filter-row">
+    <label>Entity:
+      <select [(ngModel)]="filterEntity" name="filterEntity">
+        <option value="">— alle —</option>
+        <option *ngFor="let t of entityTypes" [value]="t">{{ t }}</option>
+      </select>
+    </label>
+    <label>Operation:
+      <select [(ngModel)]="filterOperation" name="filterOperation">
+        <option value="">— alle —</option>
+        <option *ngFor="let op of operations" [value]="op">{{ opLabel(op) }}</option>
+      </select>
+    </label>
+    <span class="muted">{{ filtered.length }} Einträge</span>
+  </div>
+
+  <clr-datagrid *ngIf="!loading">
+    <clr-dg-column>Zeit</clr-dg-column>
+    <clr-dg-column>User</clr-dg-column>
+    <clr-dg-column>Operation</clr-dg-column>
+    <clr-dg-column>Entity</clr-dg-column>
+    <clr-dg-column>ID</clr-dg-column>
+    <clr-dg-column>Änderungen</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of filtered">
+      <clr-dg-cell>{{ row.timestamp | date:'dd.MM.yyyy HH:mm:ss':'':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell>{{ row.userName }}</clr-dg-cell>
+      <clr-dg-cell><span class="op op-{{ row.operation }}">{{ opLabel(row.operation) }}</span></clr-dg-cell>
+      <clr-dg-cell>{{ row.entityType }}</clr-dg-cell>
+      <clr-dg-cell class="mono">{{ row.entityId }}</clr-dg-cell>
+      <clr-dg-cell class="diff">{{ parseDiff(row.diff) }}</clr-dg-cell>
+    </clr-dg-row>
+  </clr-datagrid>
+</main>

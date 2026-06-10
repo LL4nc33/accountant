@@ -1,0 +1,31 @@
+<div class="m-list-toolbar">
+  <input type="search" [(ngModel)]="search" placeholder="Suchen…" class="m-search" />
+  <div class="m-pills">
+    <button class="m-pill" [class.active]="showArchived" (click)="showArchived = !showArchived; reload()">Archivierte</button>
+    <a class="m-pill m-pill-add" routerLink="/m/customer/new-person/edit">+ Person</a>
+    <a class="m-pill m-pill-add" routerLink="/m/customer/new-company/edit">+ Firma</a>
+  </div>
+</div>
+
+<p *ngIf="loading" class="m-muted">Lädt …</p>
+
+<p *ngIf="!loading && filtered.length === 0 && !search" class="m-muted">
+  Noch keine Kunden in der Kartei.
+</p>
+<p *ngIf="!loading && filtered.length === 0 && search" class="m-muted">
+  Kein Treffer für „{{ search }}".
+</p>
+
+<m-card *ngFor="let r of filtered" [link]="['/m/customer', r.id]">
+  <div card-head>
+    <span>{{ r.name }}</span>
+    <span class="m-customer-type">{{ r.type === 'person' ? 'Person' : 'Firma' }}</span>
+  </div>
+  <div card-body>
+    <span *ngIf="r.customerNumber" class="m-customer-number">K{{ r.customerNumber }}</span>
+    <span *ngIf="r.meta">{{ r.meta }}</span>
+  </div>
+  <div card-status>
+    <span *ngIf="r.archived" class="m-badge m-badge-warning">Archiviert</span>
+  </div>
+</m-card>

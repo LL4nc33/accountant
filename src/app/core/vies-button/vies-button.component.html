@@ -1,0 +1,11 @@
+<button
+  type="button"
+  class="btn btn-outline btn-sm"
+  [disabled]="loading"
+  (click)="check()"
+  title="Sendet UID an EU-Server (offizielle VIES-Validierung)"
+>
+  <cds-icon shape="check" *ngIf="!loading"></cds-icon>
+  <span *ngIf="loading" class="spinner spinner-inline spinner-sm"></span>
+  {{ loading ? 'Prüft…' : 'Gegen VIES prüfen' }}
+</button>

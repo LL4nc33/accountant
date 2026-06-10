@@ -1,0 +1,234 @@
+<clr-vertical-nav [clrVerticalNavCollapsible]="true" class="oa-nav">
+  <!-- Branding oben — ersetzt den fruehen Top-Header -->
+  <a routerLink="/" class="oa-brand">
+    <cds-icon shape="book" size="20" class="oa-brand-icon"></cds-icon>
+    <span class="oa-brand-name">accountant</span>
+  </a>
+
+  <a
+    clrVerticalNavLink
+    routerLink="/"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+  >
+    <cds-icon shape="home" clrVerticalNavIcon></cds-icon>
+    Dashboard
+  </a>
+  <clr-vertical-nav-group routerLinkActive="active">
+    <cds-icon shape="users" clrVerticalNavIcon></cds-icon>
+    Kunden
+    <clr-vertical-nav-group-children>
+      <ng-container *ngIf="featureFlags.navigation.showCustomerOverview">
+        <a
+          clrVerticalNavLink
+          routerLink="./crm/overview"
+          routerLinkActive="active"
+          >{{ "overview" | translate }}</a
+        >
+      </ng-container>
+      <a
+        clrVerticalNavLink
+        routerLink="./crm/person/new/edit"
+        routerLinkActive="active"
+        >Neue Person</a
+      >
+      <a
+        clrVerticalNavLink
+        routerLink="./crm/company/new/edit"
+        routerLinkActive="active"
+        >Neue Firma</a
+      >
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+  <clr-vertical-nav-group routerLinkActive="active" *ngIf="modules.projects$ | async">
+    <cds-icon shape="briefcase" clrVerticalNavIcon></cds-icon>
+    Projekte
+    <clr-vertical-nav-group-children>
+      <a
+        clrVerticalNavLink
+        routerLink="./pm/overview"
+        routerLinkActive="active"
+        >Übersicht</a
+      >
+      <a
+        clrVerticalNavLink
+        routerLink="./pm/time-entries"
+        routerLinkActive="active"
+        >Zeitbuchungen</a
+      >
+      <a
+        clrVerticalNavLink
+        routerLink="./work-time"
+        routerLinkActive="active"
+        *ngIf="modules.workHours$ | async"
+        >Arbeitszeit</a
+      >
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+  <clr-vertical-nav-group routerLinkActive="active" *ngIf="modules.products$ | async">
+    <cds-icon shape="tags" clrVerticalNavIcon></cds-icon>
+    Produkte
+    <clr-vertical-nav-group-children>
+      <a
+        clrVerticalNavLink
+        routerLink="./products"
+        routerLinkActive="active"
+        >{{ "overview" | translate }}</a
+      >
+      <a
+        clrVerticalNavLink
+        routerLink="./products/new/edit"
+        routerLinkActive="active"
+        >Neues Produkt</a
+      >
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+  <a
+    clrVerticalNavLink
+    routerLink="/chat"
+    routerLinkActive="active"
+    *ngIf="modules.llm$ | async"
+  >
+    <cds-icon shape="chat-bubble" clrVerticalNavIcon></cds-icon>
+    KI-Assistent
+  </a>
+
+  <clr-vertical-nav-group routerLinkActive="active" *ngIf="modules.expenses$ | async">
+    <cds-icon shape="wallet" clrVerticalNavIcon></cds-icon>
+    Ausgaben
+    <clr-vertical-nav-group-children>
+      <a
+        clrVerticalNavLink
+        routerLink="./expenses"
+        routerLinkActive="active"
+        >{{ "overview" | translate }}</a
+      >
+      <a
+        clrVerticalNavLink
+        routerLink="./expenses/new/edit"
+        routerLinkActive="active"
+        >Neue Ausgabe</a
+      >
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+  <clr-vertical-nav-group routerLinkActive="active">
+    <cds-icon shape="file-group" clrVerticalNavIcon></cds-icon>
+    Rechnungen
+    <clr-vertical-nav-group-children>
+      <ng-container *ngIf="featureFlags.navigation.showInvoiceOverview">
+        <a
+          clrVerticalNavLink
+          routerLink="./om/invoice"
+          routerLinkActive="active"
+          >{{ "overview" | translate }}</a
+        >
+      </ng-container>
+      <ng-container *ngIf="featureFlags.navigation.showNewInvoice">
+        <a
+          clrVerticalNavLink
+          routerLink="./om/invoice/new/edit"
+          routerLinkActive="active"
+          >Neue Rechnung</a
+        >
+      </ng-container>
+      <a
+        clrVerticalNavLink
+        routerLink="./om/offers"
+        routerLinkActive="active"
+        >Angebote</a
+      >
+      <a
+        clrVerticalNavLink
+        routerLink="./recurring"
+        routerLinkActive="active"
+        >Wiederkehrend</a
+      >
+      <a
+        clrVerticalNavLink
+        routerLink="./reminders"
+        routerLinkActive="active"
+        *ngIf="modules.reminder$ | async"
+        >Mahnungen</a
+      >
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+
+  <!-- Buchhaltung — Daten-Module (Anlagen, Reisen, Kasse) -->
+  <clr-vertical-nav-group routerLinkActive="active"
+    *ngIf="(modules.assets$ | async) || (modules.travel$ | async) || (modules.cashbook$ | async) || isAdmin">
+    <cds-icon shape="bank" clrVerticalNavIcon></cds-icon>
+    Buchhaltung
+    <clr-vertical-nav-group-children>
+      <a clrVerticalNavLink routerLink="/assets" routerLinkActive="active" *ngIf="modules.assets$ | async">Anlagen</a>
+      <a clrVerticalNavLink routerLink="/travel" routerLinkActive="active" *ngIf="modules.travel$ | async">Reisekosten</a>
+      <a clrVerticalNavLink routerLink="/cashbook" routerLinkActive="active" *ngIf="modules.cashbook$ | async">Kassabuch</a>
+      <a clrVerticalNavLink routerLink="/bank/abgleich" routerLinkActive="active" *ngIf="isAdmin">Bank-Abgleich</a>
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+
+  <!-- Steuer — Finanzamt-Meldungen + Forecasts -->
+  <clr-vertical-nav-group routerLinkActive="active" *ngIf="isAdmin">
+    <cds-icon shape="form" clrVerticalNavIcon></cds-icon>
+    Steuer
+    <clr-vertical-nav-group-children>
+      <a clrVerticalNavLink routerLink="/at-tax/uva" routerLinkActive="active">USt-Voranmeldung</a>
+      <a clrVerticalNavLink routerLink="/at-tax/zm" routerLinkActive="active">Zusammenfassende Meldung</a>
+      <a clrVerticalNavLink routerLink="/svs" routerLinkActive="active" *ngIf="modules.svs$ | async">SVS-Vorschau</a>
+      <a clrVerticalNavLink routerLink="/est" routerLinkActive="active" *ngIf="modules.est$ | async">ESt-Vorschau</a>
+      <a clrVerticalNavLink routerLink="/at-tax/bmd-export" routerLinkActive="active">BMD / RZL-Export</a>
+      <a clrVerticalNavLink routerLink="/admin/tax-export" routerLinkActive="active">Finanzamt-Export</a>
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+
+  <!-- Spacer drückt Settings + User-Block ans untere Ende der Sidebar -->
+  <div class="oa-nav-spacer" aria-hidden="true"></div>
+
+  <!-- Einstellungen — Stammdaten + Konfiguration -->
+  <clr-vertical-nav-group routerLinkActive="active">
+    <cds-icon shape="cog" clrVerticalNavIcon></cds-icon>
+    Einstellungen
+    <clr-vertical-nav-group-children>
+      <a clrVerticalNavLink routerLink="/settings/company" routerLinkActive="active">Firma</a>
+      <a clrVerticalNavLink routerLink="/settings/module" routerLinkActive="active">Module</a>
+      <a clrVerticalNavLink routerLink="/settings/number-ranges" routerLinkActive="active">Nummernkreise</a>
+      <a clrVerticalNavLink routerLink="/settings/memory" routerLinkActive="active">KI-Gedächtnis</a>
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+
+  <!-- System — Admin-Tools -->
+  <clr-vertical-nav-group routerLinkActive="active" *ngIf="isAdmin">
+    <cds-icon shape="cluster" clrVerticalNavIcon></cds-icon>
+    System
+    <clr-vertical-nav-group-children>
+      <a clrVerticalNavLink routerLink="/admin/audit-log" routerLinkActive="active">Audit-Log</a>
+      <a clrVerticalNavLink routerLink="/admin/backups" routerLinkActive="active">Backups</a>
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+
+  <!-- Konto — User-spezifisch, ganz unten -->
+  <clr-vertical-nav-group routerLinkActive="active">
+    <cds-icon shape="user" clrVerticalNavIcon></cds-icon>
+    Konto
+    <clr-vertical-nav-group-children>
+      <a clrVerticalNavLink routerLink="/handbuch" routerLinkActive="active">Handbuch</a>
+      <a clrVerticalNavLink routerLink="/change-password" routerLinkActive="active">Passwort ändern</a>
+      <a clrVerticalNavLink routerLink="/about" routerLinkActive="active">Über</a>
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+
+  <a clrVerticalNavLink (click)="switchToMobile()" style="cursor: pointer">
+    <cds-icon shape="mobile" clrVerticalNavIcon></cds-icon>
+    Mobile-Ansicht
+  </a>
+
+  <div class="oa-user-row">
+    <cds-icon shape="user" size="16"></cds-icon>
+    <span class="oa-user-name">{{ userName || '—' }}</span>
+    <button type="button" class="oa-logout" (click)="logout($event)" aria-label="Ausloggen">
+      <cds-icon shape="logout" size="14"></cds-icon>
+    </button>
+  </div>
+</clr-vertical-nav>
+<div class="content-area"><router-outlet /></div>
+<app-help-drawer></app-help-drawer>
+<app-chat-widget></app-chat-widget>

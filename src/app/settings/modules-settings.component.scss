@@ -1,0 +1,27 @@
+.hint {
+  color: var(--clr-color-neutral-700, #4A4A4A);
+  margin-bottom: 1.5rem;
+  max-width: 720px;
+}
+
+.modules-form {
+  max-width: 800px;
+}
+
+.module-section {
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--clr-color-neutral-600, #666);
+    border-bottom: 1px solid var(--clr-color-neutral-300, #E8E8E8) !important;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.actions {
+  margin-top: 1.5rem;
+}

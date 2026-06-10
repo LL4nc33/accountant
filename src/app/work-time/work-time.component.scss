@@ -1,0 +1,59 @@
+.hint {
+  color: var(--clr-color-neutral-700, #4A4A4A);
+  margin-bottom: 1rem;
+  max-width: 720px;
+}
+
+.year-bar {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-family: system-ui, sans-serif;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.92rem;
+  }
+
+  select {
+    padding: 4px 8px;
+    border: 1px solid var(--clr-color-neutral-400, #CCC);
+    border-radius: 2px;
+    background: white;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+
+  .year-totals {
+    display: flex;
+    gap: 2rem;
+    margin-left: auto;
+
+    div { display: flex; flex-direction: column; }
+    .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--clr-color-neutral-600, #666); }
+    .value { font-size: 1.2rem; font-weight: 500; color: var(--clr-color-neutral-900, #1A1A1A); font-variant-numeric: tabular-nums; }
+  }
+}
+
+.project-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 2px 4px 2px 0;
+  background: var(--clr-color-neutral-200, #F5F5F5);
+  border-radius: 12px;
+  font-size: 0.8rem;
+
+  &.billed {
+    background: var(--clr-color-success-700, #2D5A27);
+    color: white;
+  }
+}
+
+.muted {
+  color: var(--clr-color-neutral-600, #666);
+  font-style: italic;
+  margin-top: 2rem;
+}

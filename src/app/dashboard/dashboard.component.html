@@ -1,0 +1,129 @@
+<div class="dash">
+
+  <!-- Hero kompakt. Bewusst <div> statt <header> wegen Clarity-Global-
+       Style auf header (dunkelblauer Background). -->
+  <div class="dash-head">
+    <div class="dash-title">{{ today | date:'EEEE, d. MMMM y' }}</div>
+    <div class="dash-greeting">
+      <ng-container *ngIf="userName">{{ greeting }}, {{ userName }}.</ng-container>
+      <ng-container *ngIf="!userName">{{ greeting }}.</ng-container>
+    </div>
+  </div>
+
+  <!-- Onboarding-Hinweis — zeigt sich solange Firmen-Stammdaten unvollständig sind
+       und der User den Wizard noch nicht „Später ausfüllen" oder fertig geklickt hat. -->
+  <div class="dash-onboarding" *ngIf="!loading && showOnboardingHint">
+    <div class="dash-onb-text">
+      <strong>Setup noch nicht fertig.</strong>
+      Damit deine Rechnungen vollständig sind, brauchts Firmenname, Adresse, USt-Status und IBAN.
+    </div>
+    <a routerLink="/onboarding" class="btn btn-primary btn-sm">Setup öffnen</a>
+  </div>
+
+  <clr-tabs class="dash-tabs" *ngIf="!loading">
+    <clr-tab>
+      <button clrTabLink>Übersicht</button>
+      <clr-tab-content *clrIfActive>
+
+  <!-- KPI-Cards: alle Monats-Kennzahlen in einem Grid für sauberen Fluss -->
+  <section class="kpi-grid">
+    <app-kpi-card
+      label="Fakturiert · diesen Monat"
+      [value]="(invoicedThisMonth | number:'1.2-2':'de-AT') + ' €'"
+      [subtitle]="invoiceCountThisMonth + (invoiceCountThisMonth === 1 ? ' Rechnung' : ' Rechnungen')"
+      variant="primary"
+      routerLink="/om/invoice"></app-kpi-card>
+    <app-kpi-card *ngIf="(modules.expenses$ | async) && expenseCountThisMonth > 0"
+      label="Ausgaben · diesen Monat"
+      [value]="(expensesThisMonth | number:'1.2-2':'de-AT') + ' €'"
+      [subtitle]="expenseCountThisMonth + ' Belege'"
+      variant="default"
+      routerLink="/expenses"></app-kpi-card>
+    <app-kpi-card *ngIf="modules.expenses$ | async"
+      label="Saldo · diesen Monat"
+      [value]="(saldoThisMonth | number:'1.2-2':'de-AT') + ' €'"
+      subtitle="Einnahmen − Ausgaben"
+      [variant]="saldoThisMonth < 0 ? 'danger' : 'success'"
+      routerLink="/expenses"></app-kpi-card>
+    <app-kpi-card *ngIf="outstandingCount > 0"
+      label="Offene Forderungen"
+      [value]="(outstandingTotal | number:'1.2-2':'de-AT') + ' €'"
+      [subtitle]="outstandingCount + (outstandingCount === 1 ? ' Rechnung' : ' Rechnungen')"
+      variant="warning"
+      routerLink="/om/invoice"></app-kpi-card>
+    <app-kpi-card *ngIf="overdueCount > 0"
+      label="Davon überfällig"
+      [value]="overdueCount.toString()"
+      subtitle="älter als 14 Tage"
+      variant="danger"
+      routerLink="/om/invoice"></app-kpi-card>
+    <app-kpi-card *ngIf="modules.projects$ | async"
+      label="Nicht abgerechnet"
+      [value]="(unbilledHours | number:'1.1-1':'de-AT') + ' h'"
+      [subtitle]="unbilledProjectCount + (unbilledProjectCount === 1 ? ' Projekt' : ' Projekte')"
+      variant="default"
+      routerLink="/pm/time-entries"></app-kpi-card>
+    <app-kpi-card *ngIf="(modules.est$ | async) && estAnnual > 0"
+      [label]="'ESt-Vorschau · ' + today.getFullYear()"
+      [value]="(estAnnual | number:'1.2-2':'de-AT') + ' €'"
+      [subtitle]="'Grenzsatz ' + ((estMarginalRate*100) | number:'1.0-0':'de-AT') + ' %' + (estSvsCoupled ? '' : ' · ohne SVS-Abzug')"
+      [variant]="estSvsCoupled ? 'default' : 'warning'"
+      routerLink="/est"></app-kpi-card>
+    <app-kpi-card *ngIf="(modules.svs$ | async) && svsAnnualTotal > 0"
+      [label]="'SVS-Vorschau · ' + today.getFullYear()"
+      [value]="(svsAnnualTotal | number:'1.2-2':'de-AT') + ' €'"
+      [subtitle]="svsIsVorlaeufig ? 'vorläufig — Mindest-BGL' : (svsRueckstellung > 0 ? '+ ~' + (svsRueckstellung | number:'1.0-0':'de-AT') + ' € Rückstellung' : 'monatlich ~' + ((svsAnnualTotal/12) | number:'1.0-0':'de-AT') + ' €')"
+      [variant]="svsCapped === 'max' || svsRueckstellung > 5000 ? 'warning' : 'default'"
+      routerLink="/svs"></app-kpi-card>
+    <app-kpi-card
+      label="Kunden"
+      [value]="customerCount.toString()"
+      subtitle="in der Kartei"
+      variant="neutral"
+      routerLink="/crm/overview"></app-kpi-card>
+  </section>
+
+  <!-- Hauptraster: Aktivität (links, breit) + Aktionen (rechts, schmal) -->
+  <section class="dash-body">
+
+    <article class="dash-recent">
+      <h2 class="dash-h">Letzte Rechnungen</h2>
+      <ol class="recent-list" *ngIf="recentInvoices.length; else noInvoices">
+        <li *ngFor="let inv of recentInvoices">
+          <a [routerLink]="['/om/invoice', inv.id]">
+            <span class="r-num">{{ inv.number || '—' }}</span>
+            <span class="r-customer">{{ inv.customerLabel || '—' }}</span>
+            <span class="r-date">{{ inv.date | date:'dd.MM.yyyy' }}</span>
+            <span class="r-amount">{{ inv.gross | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</span>
+          </a>
+        </li>
+      </ol>
+      <ng-template #noInvoices>
+        <p class="muted">Noch keine Rechnung geschrieben. <a routerLink="/om/invoice/new/edit">Die erste anlegen →</a></p>
+      </ng-template>
+    </article>
+
+    <aside class="dash-actions">
+      <h2 class="dash-h">Schnell handeln</h2>
+      <ul class="action-list">
+        <li><a routerLink="/om/invoice/new/edit"><span>Rechnung schreiben</span><span class="arr">→</span></a></li>
+        <li *ngIf="modules.projects$ | async"><a routerLink="/pm/time-entry/new/edit"><span>Stunden buchen</span><span class="arr">→</span></a></li>
+        <li><a routerLink="/crm/overview"><span>Kunden ansehen</span><span class="arr">→</span></a></li>
+        <li *ngIf="modules.projects$ | async"><a routerLink="/pm/overview"><span>Projekte ansehen</span><span class="arr">→</span></a></li>
+      </ul>
+    </aside>
+
+  </section>
+
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink>Analyse</button>
+      <clr-tab-content *clrIfActive>
+        <app-analytics></app-analytics>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+
+  <p class="muted dash-loading" *ngIf="loading">Lade …</p>
+</div>

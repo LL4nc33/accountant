@@ -1,0 +1,73 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Mahnungen</h1>
+  </div>
+  <div class="page-head-actions"></div>
+</div>
+
+<main>
+  <p class="hint">
+    Mahnungs-Übersicht — Entwürfe + versendete Mahnungen pro Stufe.
+    Mahnungen entstehen am Invoice-View über „+ Neue Mahnung" oder werden
+    vom Background-Scanner als Entwürfe vorgeschlagen.
+  </p>
+
+  <div class="filter-row" *ngIf="!loading && rows.length > 0">
+    <label>Stufe:
+      <select [(ngModel)]="filterStage" name="filterStage">
+        <option value="">— alle —</option>
+        <option value="1">Erinnerung (1)</option>
+        <option value="2">Mahnung (2)</option>
+        <option value="3">Letzte Mahnung (3)</option>
+      </select>
+    </label>
+    <label>Status:
+      <select [(ngModel)]="filterSent" name="filterSent">
+        <option value="">— alle —</option>
+        <option value="open">Entwurf</option>
+        <option value="sent">Versendet</option>
+      </select>
+    </label>
+    <span class="muted">{{ filtered.length }} Einträge</span>
+  </div>
+
+  <app-empty-state
+    *ngIf="!loading && rows.length === 0"
+    icon="warning-standard"
+    title="Noch keine Mahnungen"
+    text="Solange alle Rechnungen rechtzeitig bezahlt werden, ist hier nichts zu tun. Sobald eine Rechnung überfällig ist, kannst du sie aus der Invoice-View anmahnen."
+    ctaLabel="Zu den Rechnungen"
+    [ctaRouterLink]="['/om/invoice']"
+  ></app-empty-state>
+
+  <clr-datagrid *ngIf="!loading && filtered.length > 0">
+    <clr-dg-column style="width: 110px">Datum</clr-dg-column>
+    <clr-dg-column style="width: 120px">Mahn-Nr.</clr-dg-column>
+    <clr-dg-column style="width: 130px">Stufe</clr-dg-column>
+    <clr-dg-column>Rechnung</clr-dg-column>
+    <clr-dg-column>Kunde</clr-dg-column>
+    <clr-dg-column style="width: 90px" class="dg-right">Überfällig</clr-dg-column>
+    <clr-dg-column style="width: 140px" class="dg-right">Gesamtforderung</clr-dg-column>
+    <clr-dg-column style="width: 120px">Status</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of filtered" (click)="openInvoice(row.invoiceId)">
+      <clr-dg-cell>{{ row.reminderDate | date:'dd.MM.yyyy' }}</clr-dg-cell>
+      <clr-dg-cell>{{ row.reminderNumber }}</clr-dg-cell>
+      <clr-dg-cell>
+        <span class="label" [class.label-warning]="row.stage === 2" [class.label-danger]="row.stage === 3" style="font-size:.7rem">
+          {{ stageLabel(row.stage) }}
+        </span>
+      </clr-dg-cell>
+      <clr-dg-cell>{{ row.invoiceNumber || '—' }}</clr-dg-cell>
+      <clr-dg-cell>{{ row.customerId ? (customerNameById.get(row.customerId) || '—') : '—' }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.daysOverdue }} Tg</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.totalDue | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell>
+        <span *ngIf="row.sent" class="label label-success" style="font-size:.7rem">Versendet</span>
+        <span *ngIf="!row.sent" class="label" style="font-size:.7rem">Entwurf</span>
+      </clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>{{ filtered.length }} Mahnungen</clr-dg-footer>
+  </clr-datagrid>
+</main>

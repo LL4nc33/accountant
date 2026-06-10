@@ -1,0 +1,69 @@
+.filters {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin: 1rem 0 1.5rem;
+  font-family: system-ui, sans-serif;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+  select {
+    padding: 4px 8px;
+    border: 1px solid var(--clr-color-neutral-400, #ccc);
+    border-radius: 2px;
+    background: white;
+    font-family: inherit;
+  }
+}
+
+.empty {
+  padding: 1rem 1.25rem;
+  background: var(--clr-color-neutral-100, #fafafa);
+  border-left: 3px solid var(--clr-color-neutral-400, #ccc);
+  color: var(--clr-color-neutral-700, #4a4a4a);
+  max-width: 600px;
+}
+
+.offers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: system-ui, sans-serif;
+  font-size: 0.92rem;
+  background: white;
+
+  th, td {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--clr-color-neutral-300, #e0e0e0);
+    vertical-align: middle;
+  }
+  th {
+    background: var(--clr-color-neutral-200, #f3f3f3);
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: none;
+  }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .actions { text-align: right; white-space: nowrap; }
+  tr.archived { opacity: 0.55; }
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--clr-color-neutral-300, #e0e0e0);
+  color: var(--clr-color-neutral-900, #1a1a1a);
+
+  &.status-draft  { background: var(--clr-color-neutral-300, #e0e0e0); }
+  &.status-sent   { background: var(--clr-color-action-100, #e3edf9); color: var(--clr-color-action-700, #1c4d7c); }
+  &.status-won    { background: var(--clr-color-success-100, #dff4d5); color: var(--clr-color-success-700, #266100); }
+  &.status-lost   { background: var(--clr-color-danger-100, #fbeaea);  color: var(--clr-color-danger-700, #8b0000); }
+  &.status-expired { background: var(--clr-color-warning-100, #fdf6e3); color: var(--clr-color-warning-800, #7d5100); }
+}

@@ -1,0 +1,76 @@
+<form #form="ngForm" clrForm clrLayout="horizontal">
+  <div class="invoice-item-card">
+    <!-- Produkt-Katalog-Picker: nur wenn Modul aktiv -->
+    <div class="item-picker" *ngIf="productsEnabled && products.length > 0">
+      <label class="picker-label">Aus Katalog vorbefüllen:</label>
+      <select class="picker-select" name="productPicker"
+              [(ngModel)]="selectedProductId"
+              (ngModelChange)="onProductPicked($event)">
+        <option value="">— freie Eingabe —</option>
+        <option *ngFor="let p of products" [value]="p.id">{{ p.name }} ({{ p.defaultPrice | currency:'EUR':'symbol':'1.2-2':'de-AT' }} / {{ p.unit }})</option>
+      </select>
+    </div>
+    <!-- Header row: Bezeichnung (wide) + Total (read-only, right) + Delete -->
+    <div class="item-header">
+      <div class="item-name">
+        <app-autofield
+          [field]="fields.name"
+          [(entity)]="item"
+          [showLabel]="false"
+        ></app-autofield>
+      </div>
+      <div class="item-total">
+        <span class="total-label">Gesamt</span>
+        <span class="total-value">{{ item.total | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</span>
+      </div>
+      <button class="btn btn-icon btn-sm btn-link delete-btn"
+              type="button"
+              (click)="parent.deleteRelationItem('items', item)"
+              title="Position entfernen">
+        <cds-icon shape="times"></cds-icon>
+      </button>
+    </div>
+
+    <!-- Body row: Menge | Mengentyp | Einzelpreis | USt | Rabatt | Rabatt-Typ -->
+    <div class="item-body">
+      <div class="field">
+        <label>Menge</label>
+        <app-autofield [field]="fields.quantity" [(entity)]="item" [showLabel]="false"></app-autofield>
+      </div>
+      <div class="field">
+        <label>Einheit</label>
+        <app-autofield [field]="fields.amountType!" [(entity)]="item" [showLabel]="false"></app-autofield>
+      </div>
+      <div class="field">
+        <label>Einzelpreis (€)</label>
+        <app-autofield [field]="fields.price" [(entity)]="item" [showLabel]="false"></app-autofield>
+      </div>
+      <div class="field">
+        <label>USt%</label>
+        <clr-select-container>
+          <label class="clr-sr-only">USt%</label>
+          <select clrSelect name="vat" [(ngModel)]="item.vat">
+            <option *ngFor="let v of vatOptions" [ngValue]="v">{{ v }}%</option>
+          </select>
+        </clr-select-container>
+      </div>
+      <div class="field">
+        <label>Rabatt</label>
+        <app-autofield [field]="fields.discount" [(entity)]="item" [showLabel]="false"></app-autofield>
+      </div>
+      <div class="field">
+        <label>Rabatt-Typ</label>
+        <app-autofield [field]="fields.discountType!" [(entity)]="item" [showLabel]="false"></app-autofield>
+      </div>
+    </div>
+
+    <!-- Footer: Always-visible description textarea -->
+    <div class="item-footer">
+      <clr-textarea-container>
+        <label>Beschreibung (Details der Position)</label>
+        <textarea clrTextarea name="description" [(ngModel)]="item.description" rows="2"
+                  placeholder="z.B. Implementation Login-Page mit OAuth-Integration"></textarea>
+      </clr-textarea-container>
+    </div>
+  </div>
+</form>

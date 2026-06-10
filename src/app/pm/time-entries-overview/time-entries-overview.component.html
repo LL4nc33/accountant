@@ -1,0 +1,56 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Zeitbuchungen</h1>
+  </div>
+  <div class="page-head-actions">
+    <a class="btn btn-primary" [routerLink]="['/pm/time-entry/new/edit']">
+      <cds-icon shape="plus"></cds-icon>
+      Neue Zeitbuchung
+    </a>
+  </div>
+</div>
+
+<main>
+  <clr-checkbox-wrapper>
+    <input type="checkbox" clrCheckbox [(ngModel)]="showOnlyOpen" name="showOnlyOpen" />
+    <label>Nur offene (unabgerechnete) anzeigen</label>
+  </clr-checkbox-wrapper>
+
+  <app-empty-state
+    *ngIf="!loading && rows.length === 0"
+    icon="clock"
+    title="Noch keine Zeitbuchungen"
+    text="Buche Stunden — sie erscheinen hier chronologisch."
+    ctaLabel="Neue Zeitbuchung"
+    [ctaRouterLink]="['/pm/time-entry/new/edit']"
+  ></app-empty-state>
+
+  <clr-datagrid *ngIf="loading || rows.length > 0" [clrDgLoading]="loading">
+    <clr-dg-column style="width: 110px">Datum</clr-dg-column>
+    <clr-dg-column>Projekt</clr-dg-column>
+    <clr-dg-column>Kunde</clr-dg-column>
+    <clr-dg-column style="width: 80px" class="dg-right">Stunden</clr-dg-column>
+    <clr-dg-column style="width: 110px" class="dg-right">Satz €/h</clr-dg-column>
+    <clr-dg-column style="width: 120px" class="dg-right">Betrag</clr-dg-column>
+    <clr-dg-column>Beschreibung</clr-dg-column>
+    <clr-dg-column style="width: 130px">Status</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of filteredRows">
+      <clr-dg-cell>{{ row.entry.date | date:'dd.MM.yyyy' }}</clr-dg-cell>
+      <clr-dg-cell><a [routerLink]="['/pm/project', row.projectId]">{{ row.projectName }}</a></clr-dg-cell>
+      <clr-dg-cell>{{ row.customerName }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.entry.hours | number:'1.1-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.entry.hourlyRate | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.entry.amount | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell>{{ row.entry.description }}</clr-dg-cell>
+      <clr-dg-cell>
+        <span *ngIf="row.entry.billedInvoiceItemId" class="label label-info" style="font-size:.7rem">Abgerechnet</span>
+        <a *ngIf="!row.entry.billedInvoiceItemId" [routerLink]="['/pm/time-entry', row.entry.id, 'edit']" class="label" style="font-size:.7rem">Bearbeiten</a>
+      </clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>
+      {{ filteredRows.length }} Einträge · <strong>{{ totalHours | number:'1.1-2':'de-AT' }} h</strong> · <strong>{{ totalAmount | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</strong>
+    </clr-dg-footer>
+  </clr-datagrid>
+</main>

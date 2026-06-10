@@ -1,0 +1,56 @@
+<main class="edit-page" *ngIf="entity">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>{{ isNew ? 'Neue Zeitbuchung' : 'Zeitbuchung bearbeiten' }}</h1>
+      <p *ngIf="!isNew && projectName">Projekt: {{ projectName }}</p>
+    </div>
+    <div class="page-head-actions">
+      <button class="btn btn-danger-outline" type="button" *ngIf="!isNew && !entity.billedInvoiceItemId" (click)="deleteEntry()">Löschen</button>
+      <a class="btn btn-outline" routerLink="/pm/time-entries">Abbrechen</a>
+      <button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+    </div>
+  </div>
+
+  <form clrForm clrLayout="horizontal" (ngSubmit)="save()">
+    <clr-select-container *ngIf="isNew">
+      <label>Projekt</label>
+      <select clrSelect name="projectId" [ngModel]="entity.projectId" (ngModelChange)="onProjectChange($event)" required>
+        <option [ngValue]="''" *ngIf="!entity.projectId">— Projekt wählen —</option>
+        <option *ngFor="let p of activeProjects" [value]="p.id">{{ p.label }}</option>
+      </select>
+      <clr-control-helper *ngIf="!activeProjects.length">
+        Noch kein aktives Projekt — leg eines unter <a routerLink="/pm/overview">Projekte</a> an.
+      </clr-control-helper>
+    </clr-select-container>
+
+    <clr-date-container>
+      <label>Datum</label>
+      <input type="date" clrDate name="date" [(clrDate)]="entity.date" [disabled]="!!entity.billedInvoiceItemId" />
+    </clr-date-container>
+
+    <clr-number-input-container>
+      <label>Stunden</label>
+      <input clrNumberInput type="number" step="0.25" min="0" name="hours" [(ngModel)]="entity.hours" [disabled]="!!entity.billedInvoiceItemId" />
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label>Stundensatz (€)</label>
+      <input clrNumberInput type="number" step="0.01" name="hourlyRate" [(ngModel)]="entity.hourlyRate" [disabled]="!!entity.billedInvoiceItemId" />
+    </clr-number-input-container>
+
+    <clr-textarea-container>
+      <label>Beschreibung</label>
+      <textarea clrTextarea name="description" [(ngModel)]="entity.description" rows="3" [disabled]="!!entity.billedInvoiceItemId"></textarea>
+    </clr-textarea-container>
+
+    <div class="readonly" *ngIf="entity.billedInvoiceItemId">
+      <clr-alert clrAlertType="info" [clrAlertClosable]="false">
+        <clr-alert-item>
+          <span class="alert-text">Felder sind read-only — Eintrag bereits abgerechnet (Rechnung-Item: {{ entity.billedInvoiceItemId }})</span>
+        </clr-alert-item>
+      </clr-alert>
+    </div>
+
+    <button type="submit" hidden></button>
+  </form>
+</main>

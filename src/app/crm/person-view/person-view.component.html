@@ -1,0 +1,111 @@
+<ng-container *ngIf="entity">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>{{ 'person' | translate }}: {{ entity.displayName }}</h1>
+      <app-tag-pill *ngIf="entity.tagIds" [tagIds]="entity.tagIds"></app-tag-pill>
+    </div>
+
+    <div class="page-head-actions">
+      <button
+        type="button"
+        class="btn btn-icon btn-outline"
+        aria-label="overview"
+        [routerLink]="['/crm/overview']"
+      >
+        {{ 'overview' | translate }}
+        <cds-icon shape="view-list"></cds-icon>
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon btn-danger"
+        aria-label="delete-person"
+        (click)="confirmDelete()"
+      >
+        {{ 'deleteCustomer' | translate }}
+        <cds-icon shape="trash"></cds-icon>
+      </button>
+      <a
+        type="button"
+        class="btn btn-icon btn-outline"
+        aria-label="dsgvo-export"
+        [href]="'/api/dsgvo/customer/' + entity.id"
+        target="_blank"
+        rel="noopener"
+        title="DSGVO Art. 15 — Auskunftsdaten als JSON-Download"
+      >
+        <cds-icon shape="download-cloud"></cds-icon>
+        DSGVO-Auskunft
+      </a>
+      <a
+        [routerLink]="['./edit']"
+        type="button"
+        class="btn btn-icon btn-primary"
+        aria-label="edit-person"
+      >
+        {{ 'editCustomer' | translate }}
+        <cds-icon shape="pencil"></cds-icon>
+      </a>
+    </div>
+  </div>
+
+  <main>
+    <table class="table table-vertical">
+      <tbody>
+        <tr *ngIf="featureFlags.personView.showPerson">
+          <th>{{ 'person' | translate }}</th>
+          <td>{{entity.salutation}} {{entity.firstname}} {{entity.lastname}} </td>
+        </tr>
+        <tr *ngIf="featureFlags.personView.showCustomerNumber">
+          <th>{{ 'customerNumber' | translate }}</th>
+          <td>{{entity.customerNumber}}</td>
+        </tr>
+        <tr *ngIf="featureFlags.personView.showCreatedAt">
+          <th>{{ 'createdAt' | translate }}</th>
+          <td>{{ entity.createdAt | date : 'dd.MM.yyyy HH:mm' }}</td>
+        </tr>
+        <tr *ngIf="featureFlags.personView.showBirthdate">
+          <th>{{ 'birthdate' | translate }}</th>
+          <td>{{ entity.birthdate | date : 'dd.MM.yyyy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-container *ngIf="featureFlags.personView.showAddresses">
+      <app-address-view *ngFor="let address of entity.addresses" [address]="address" [entity]="entity"></app-address-view>
+    </ng-container>
+
+    <section *ngIf="entity.customFields && entity.customFields !== '{}'" class="cf-section">
+      <h2>Custom Fields</h2>
+      <app-custom-fields-view [customFields]="entity.customFields"></app-custom-fields-view>
+    </section>
+
+    <app-customer-activity [customerId]="entity.id"></app-customer-activity>
+  </main>
+
+  <clr-modal
+    [(clrModalOpen)]="showConfirmDeleteModal"
+    [clrModalStaticBackdrop]="false"
+  >
+    <h3 class="modal-title">{{ 'deleteCustomer' | translate }}</h3>
+    <div class="modal-body">
+      <p>
+        {{ 'confirmDeletePerson' | translate: { firstname: entity.firstname, lastname: entity.lastname } }}
+      </p>
+      <p class="hint">
+        Diese Aktion kann nicht rückgängig gemacht werden.
+        Stattdessen kannst du den Kunden auch archivieren — Daten bleiben dann erhalten.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="showConfirmDeleteModal = false"
+      >
+        Abbrechen
+      </button>
+      <button type="button" class="btn btn-danger" (click)="delete()">
+        Endgültig löschen
+      </button>
+    </div>
+  </clr-modal>
+</ng-container>

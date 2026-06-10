@@ -1,0 +1,82 @@
+.m-form {
+  padding-bottom: 5rem;
+}
+
+.m-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    font-size: 1rem;
+    border: 1px solid #DCDCDC;
+    border-radius: 6px;
+    background: white;
+    font-family: inherit;
+    box-sizing: border-box;
+    min-height: 44px;
+
+    &:focus {
+      border-color: #0072a3;
+      outline: none;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+.m-form-actions {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(250, 250, 250, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 0.8rem 0;
+  padding-bottom: calc(0.8rem + env(safe-area-inset-bottom));
+  margin: 0 -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: flex;
+  gap: 0.6rem;
+  border-top: 1px solid #E8E8E8;
+  z-index: 10;
+}
+
+.m-pill {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  background: white;
+  border: 1px solid #DCDCDC;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  color: #1A1A1A;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 48px;
+
+  &:disabled { opacity: 0.5; }
+
+  &.m-pill-primary {
+    background: #1A1A1A;
+    color: white;
+    border-color: #1A1A1A;
+  }
+}
+
+.m-muted {
+  color: #888;
+  text-align: center;
+  padding: 2rem 1rem;
+}

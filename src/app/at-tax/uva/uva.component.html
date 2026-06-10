@@ -1,0 +1,202 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>USt-Voranmeldung</h1>
+  </div>
+  <div class="page-head-actions"></div>
+</div>
+
+<main>
+  <p class="hint">
+    Aggregierte Bemessungsgrundlagen und Vorsteuer pro Zeitraum gemäß
+    UVA-Kennzahlen (FinanzOnline U30). Nur festgeschriebene Rechnungen
+    fließen in die Berechnung ein.
+  </p>
+
+  <section class="picker no-print">
+    <div class="picker-row">
+      <label>Zeitraum</label>
+      <div class="mode-toggle">
+        <button [class.active]="mode === 'month'" (click)="mode = 'month'; load()">Monat</button>
+        <button [class.active]="mode === 'quarter'" (click)="mode = 'quarter'; load()">Quartal</button>
+        <button [class.active]="mode === 'year'" (click)="mode = 'year'; load()">Jahr</button>
+      </div>
+    </div>
+    <div class="picker-row">
+      <select *ngIf="mode === 'month'" [(ngModel)]="month" (ngModelChange)="load()">
+        <option *ngFor="let m of months" [ngValue]="m.v">{{ m.l }}</option>
+      </select>
+      <select *ngIf="mode === 'quarter'" [(ngModel)]="quarter" (ngModelChange)="load()">
+        <option *ngFor="let q of quarters" [ngValue]="q">{{ q }}. Quartal</option>
+      </select>
+      <select [(ngModel)]="year" (ngModelChange)="load()">
+        <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+      </select>
+    </div>
+  </section>
+
+  <div *ngIf="loading" class="loading">Lade Aggregation…</div>
+  <div *ngIf="error" class="error-box">{{ error }}</div>
+
+  <ng-container *ngIf="result && !loading">
+    <div class="report-head">
+      <div class="period-label">{{ result.period.label }}</div>
+      <div class="period-range">{{ result.period.from }} bis {{ result.period.to }}</div>
+      <div *ngIf="result.isKleinunternehmer" class="ku-hint">
+        Kleinunternehmer-Modus aktiv — keine USt auf Ausgangsrechnungen,
+        kein Vorsteuerabzug.
+      </div>
+    </div>
+
+    <section class="summary-grid">
+      <div class="summary-card" [ngClass]="zahllastClass()">
+        <div class="card-label">{{ zahllastLabel() }}</div>
+        <div class="card-value">{{ fmt(result.zahllast > 0 ? result.zahllast : -result.zahllast) }} €</div>
+      </div>
+      <div class="summary-card neutral">
+        <div class="card-label">USt-Summe (Ausgangs-USt)</div>
+        <div class="card-value">{{ fmt(result.ustSumme) }} €</div>
+      </div>
+      <div class="summary-card neutral">
+        <div class="card-label">Vorsteuer (KZ 060)</div>
+        <div class="card-value">{{ fmt(result.kzFelder.kz060) }} €</div>
+      </div>
+    </section>
+
+    <h2>UVA-Kennzahlen für FinanzOnline U30</h2>
+    <table class="kz-table">
+      <thead>
+        <tr>
+          <th class="kz">KZ</th>
+          <th>Bezeichnung</th>
+          <th class="num">Betrag</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="kz-row-strong">
+          <td class="kz">000</td>
+          <td>Gesamtbetrag der Bemessungsgrundlagen</td>
+          <td class="num">{{ fmt(result.kzFelder.kz000) }} €</td>
+        </tr>
+        <tr>
+          <td class="kz">022</td>
+          <td>Bemessungsgrundlage 20% (Normalsteuersatz)</td>
+          <td class="num">{{ fmt(result.kzFelder.kz022) }} €</td>
+        </tr>
+        <tr>
+          <td class="kz">029</td>
+          <td>Bemessungsgrundlage 10% (ermäßigter Satz)</td>
+          <td class="num">{{ fmt(result.kzFelder.kz029) }} €</td>
+        </tr>
+        <tr>
+          <td class="kz">006</td>
+          <td>Bemessungsgrundlage 13% (ermäßigter Satz)</td>
+          <td class="num">{{ fmt(result.kzFelder.kz006) }} €</td>
+        </tr>
+        <tr>
+          <td class="kz">020</td>
+          <td>Bemessungsgrundlage 0% / steuerfrei</td>
+          <td class="num">{{ fmt(result.kzFelder.kz020) }} €</td>
+        </tr>
+        <tr>
+          <td class="kz">011</td>
+          <td>Innergemeinschaftliche Lieferungen</td>
+          <td class="num">{{ fmt(result.kzFelder.kz011) }} €</td>
+        </tr>
+        <tr>
+          <td class="kz">017</td>
+          <td>Ausfuhrlieferungen (Drittland)</td>
+          <td class="num">{{ fmt(result.kzFelder.kz017) }} €</td>
+        </tr>
+        <tr *ngIf="result.isKleinunternehmer">
+          <td class="kz">016</td>
+          <td>Kleinunternehmer-Befreiung §6 Abs. 1 Z 27</td>
+          <td class="num">{{ fmt(result.kzFelder.kz016) }} €</td>
+        </tr>
+        <tr class="kz-row-strong">
+          <td class="kz">060</td>
+          <td>Vorsteuer aus Eingangsrechnungen</td>
+          <td class="num">{{ fmt(result.kzFelder.kz060) }} €</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Ausgangsrechnungen-Details</h2>
+    <table class="detail-table">
+      <thead>
+        <tr><th>USt-Satz</th><th class="num">Netto</th><th class="num">USt</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>20%</td><td class="num">{{ fmt(result.ausgaenge.rate20.netto) }} €</td><td class="num">{{ fmt(result.ausgaenge.rate20.ust) }} €</td></tr>
+        <tr><td>13%</td><td class="num">{{ fmt(result.ausgaenge.rate13.netto) }} €</td><td class="num">{{ fmt(result.ausgaenge.rate13.ust) }} €</td></tr>
+        <tr><td>10%</td><td class="num">{{ fmt(result.ausgaenge.rate10.netto) }} €</td><td class="num">{{ fmt(result.ausgaenge.rate10.ust) }} €</td></tr>
+        <tr><td>0%</td><td class="num">{{ fmt(result.ausgaenge.rate0.netto) }} €</td><td class="num">—</td></tr>
+        <tr *ngIf="result.ausgaenge.reverseChargeEU.count">
+          <td>Reverse-Charge EU ({{ result.ausgaenge.reverseChargeEU.count }} Re.)</td>
+          <td class="num">{{ fmt(result.ausgaenge.reverseChargeEU.netto) }} €</td>
+          <td class="num">— RC</td>
+        </tr>
+        <tr *ngIf="result.ausgaenge.reverseChargeDrittland.count">
+          <td>Drittland ({{ result.ausgaenge.reverseChargeDrittland.count }} Re.)</td>
+          <td class="num">{{ fmt(result.ausgaenge.reverseChargeDrittland.netto) }} €</td>
+          <td class="num">— nicht stb.</td>
+        </tr>
+        <tr *ngIf="result.ausgaenge.kleinunternehmerBefreit.count">
+          <td>Kleinunternehmer ({{ result.ausgaenge.kleinunternehmerBefreit.count }} Re.)</td>
+          <td class="num">{{ fmt(result.ausgaenge.kleinunternehmerBefreit.netto) }} €</td>
+          <td class="num">— befreit</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td><strong>Σ {{ result.ausgaenge.invoiceCount }} Rechnungen</strong></td>
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <h2>Eingangsrechnungen-Details (Vorsteuer)</h2>
+    <table class="detail-table">
+      <thead>
+        <tr><th>USt-Satz</th><th class="num">Netto</th><th class="num">Vorsteuer</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>20%</td><td class="num">{{ fmt(result.eingaenge.rate20.netto) }} €</td><td class="num">{{ fmt(result.eingaenge.rate20.ust) }} €</td></tr>
+        <tr><td>13%</td><td class="num">{{ fmt(result.eingaenge.rate13.netto) }} €</td><td class="num">{{ fmt(result.eingaenge.rate13.ust) }} €</td></tr>
+        <tr><td>10%</td><td class="num">{{ fmt(result.eingaenge.rate10.netto) }} €</td><td class="num">{{ fmt(result.eingaenge.rate10.ust) }} €</td></tr>
+        <tr><td>0%</td><td class="num">{{ fmt(result.eingaenge.rate0.netto) }} €</td><td class="num">—</td></tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td><strong>Σ {{ result.eingaenge.expenseCount }} Belege</strong></td>
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <section class="actions no-print">
+      <button class="btn btn-primary" (click)="downloadCsv()">
+        <cds-icon shape="download"></cds-icon>
+        CSV herunterladen
+      </button>
+      <button class="btn" (click)="print()">
+        <cds-icon shape="printer"></cds-icon>
+        Drucken / PDF
+      </button>
+    </section>
+
+    <details class="contents-hint no-print">
+      <summary>Wie übertrage ich das in FinanzOnline?</summary>
+      <ol>
+        <li>Melde dich auf <a href="https://finanzonline.bmf.gv.at" target="_blank">finanzonline.bmf.gv.at</a> an.</li>
+        <li>Eingaben → Erklärungen → Umsatzsteuervoranmeldung.</li>
+        <li>Übertrage die KZ-Werte oben in das Formular U30 (gleicher Kennzahlen-Code).</li>
+        <li>Bei KU-Modus: Nur KZ 016 (Befreiung) eintragen, restliche Felder bleiben 0.</li>
+      </ol>
+      <p class="muted">
+        Die Aggregation ersetzt keine Steuerberatung. Sie liefert die Bemessungsgrundlagen
+        — etwaige Korrekturen (z.B. Anlagenabschreibung, ig. Erwerb, Eigenverbrauch) sind
+        separat zu erfassen. §132 BAO: 7-jährige Aufbewahrungspflicht beachten.
+      </p>
+    </details>
+  </ng-container>
+</main>

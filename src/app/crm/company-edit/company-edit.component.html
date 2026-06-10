@@ -1,0 +1,194 @@
+<ng-container *ngIf="entity">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>{{ 'editCompany' | translate }}<span *ngIf="entity.archived" class="label" style="margin-left:0.75rem">Archiviert</span></h1>
+    </div>
+    <div class="page-head-actions">
+      <button
+        type="button"
+        class="btn btn-outline"
+        *ngIf="entity.id"
+        (click)="toggleArchive()"
+      >
+        {{ entity.archived ? 'Reaktivieren' : 'Archivieren' }}
+      </button>
+      <a class="btn btn-outline"
+         [routerLink]="entity.id ? ['/crm/company', entity.id.toString()] : ['/crm/overview']">
+        Abbrechen
+      </a>
+      <button
+        (click)="saveChanges()"
+        [disabled]="form?.form?.invalid || hasInvalidForms()"
+        type="button"
+        class="btn btn-primary"
+      >
+        {{ 'saveChanges' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <clr-alert *ngIf="entity.archived" clrAlertType="info" [clrAlertClosable]="false">
+    <clr-alert-item>
+      <span class="alert-text">
+        Diese Firma ist archiviert und erscheint nicht mehr in der Standard-Kundenliste. Bestehende Rechnungen bleiben unverändert.
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+
+  <main>
+    <form #form="ngForm" clrForm clrLayout="horizontal">
+      <h3>{{ 'companyData' | translate }}</h3>
+      <ng-container *ngIf="featureFlags.companyEdit.showNameField">
+        <app-autofield
+          [field]="fields.name"
+          width="400px"
+          [(entity)]="entity"
+          [label]="'company' | translate"
+        ></app-autofield>
+      </ng-container>
+      <ng-container *ngIf="featureFlags.companyEdit.showCustomerNumberField">
+        <app-autofield
+          [field]="fields.customerNumber"
+          width="400px"
+          [(entity)]="entity"
+          [placeholder]="previewCustomerNumber"
+          [label]="'customerNumber' | translate"
+        ></app-autofield>
+      </ng-container>
+      <div class="vat-id-row">
+        <clr-input-container>
+          <label>UID / USt-ID / MWST-Nr.</label>
+          <input clrInput name="vatId" [(ngModel)]="entity.vatId" placeholder="z.B. ATU12345678" />
+          <clr-control-helper *ngIf="entity.vatIdVerifiedAt">
+            ✓ VIES geprüft am {{ entity.vatIdVerifiedAt | date:'shortDate' }}<ng-container *ngIf="entity.vatIdVerifiedName"> — {{ entity.vatIdVerifiedName }}</ng-container>
+          </clr-control-helper>
+        </clr-input-container>
+        <app-vies-button [vatId]="entity.vatId ?? ''" [customerId]="entity.id ?? ''" customerType="company" (result)="onViesResult($event)"></app-vies-button>
+      </div>
+    </form>
+    <div cds-layout="m-t:xl">
+      <clr-tabs>
+        <clr-tab *ngIf="featureFlags.companyEdit.showAddresses">
+          <button clrTabLink>{{ 'address' | translate }}</button>
+          <clr-tab-content *clrIfActive>
+            <app-address-edit *ngFor="let address of entity.addresses"
+              [address]="address"
+              [parent]="instance"
+            ></app-address-edit>
+            <button
+              cds-layout="m-t:md"
+              (click)="createRelationItem('addresses')"
+              type="button"
+              class="btn btn-outline"
+              aria-label="add-address"
+            >
+              <cds-icon shape="plus"></cds-icon> {{ 'addAddress' | translate }}
+            </button>
+          </clr-tab-content>
+        </clr-tab>
+        <clr-tab *ngIf="featureFlags.companyEdit.showContactDetails">
+          <button clrTabLink>{{ 'contactDetails' | translate }}</button>
+          <clr-tab-content *clrIfActive>
+            <form clrForm clrLayout="horizontal" *ngIf="entity">
+              <clr-input-container>
+                <label>E-Mail</label>
+                <input clrInput type="email" name="email" [(ngModel)]="entity.email" placeholder="kontakt@example.com" />
+              </clr-input-container>
+              <clr-input-container>
+                <label>Telefon</label>
+                <input clrInput name="phone" [(ngModel)]="entity.phone" placeholder="+43 1 23456789" />
+              </clr-input-container>
+              <clr-input-container>
+                <label>Mobil</label>
+                <input clrInput name="mobile" [(ngModel)]="entity.mobile" placeholder="+43 660 1234567" />
+              </clr-input-container>
+              <clr-input-container>
+                <label>Fax</label>
+                <input clrInput name="fax" [(ngModel)]="entity.fax" />
+              </clr-input-container>
+              <clr-input-container>
+                <label>Website</label>
+                <input clrInput type="url" name="website" [(ngModel)]="entity.website" placeholder="https://" />
+              </clr-input-container>
+            </form>
+          </clr-tab-content>
+        </clr-tab>
+        <clr-tab *ngIf="featureFlags.companyEdit.showPaymentInformation">
+          <button clrTabLink>{{ 'paymentInformation' | translate }}</button>
+          <clr-tab-content *clrIfActive>
+            <form clrForm clrLayout="horizontal" *ngIf="entity">
+              <p class="hint" style="color: var(--clr-color-neutral-700, #666); margin-bottom: 1rem;">
+                Bankdaten des Kunden — wird nur bei Rückerstattungen oder Lastschriften benötigt.
+              </p>
+              <clr-input-container>
+                <label>IBAN</label>
+                <input clrInput name="iban" [(ngModel)]="entity.iban" placeholder="AT00 0000 0000 0000 0000" />
+              </clr-input-container>
+              <clr-input-container>
+                <label>BIC</label>
+                <input clrInput name="bic" [(ngModel)]="entity.bic" placeholder="GIBAATWWXXX" />
+              </clr-input-container>
+              <clr-input-container>
+                <label>Bankname</label>
+                <input clrInput name="bankName" [(ngModel)]="entity.bankName" />
+              </clr-input-container>
+            </form>
+          </clr-tab-content>
+        </clr-tab>
+        <clr-tab *ngIf="featureFlags.companyEdit.showConditions">
+          <button clrTabLink>{{ 'conditions' | translate }}</button>
+          <clr-tab-content *clrIfActive>
+            <form clrForm clrLayout="horizontal" *ngIf="entity">
+              <clr-number-input-container>
+                <label>Zahlungsziel (Tage)</label>
+                <input clrNumberInput type="number" min="0" max="365" name="paymentTermsDays" [(ngModel)]="entity.paymentTermsDays" />
+                <clr-control-helper>z.B. 14 = „zahlbar innerhalb 14 Tagen netto". Default 14.</clr-control-helper>
+              </clr-number-input-container>
+              <clr-number-input-container>
+                <label>Skonto-Satz (%)</label>
+                <input clrNumberInput type="number" min="0" max="100" step="0.5" name="discountPercent" [(ngModel)]="entity.discountPercent" />
+                <clr-control-helper>z.B. 2 = „2% Skonto bei Zahlung innerhalb …". 0 = kein Skonto.</clr-control-helper>
+              </clr-number-input-container>
+              <clr-number-input-container>
+                <label>Skonto-Frist (Tage)</label>
+                <input clrNumberInput type="number" min="0" max="365" name="discountDays" [(ngModel)]="entity.discountDays" />
+                <clr-control-helper>Innerhalb wieviel Tagen der Skonto gilt. 0 = kein Skonto.</clr-control-helper>
+              </clr-number-input-container>
+              <clr-number-input-container>
+                <label>Standard-Stundensatz (€)</label>
+                <input clrNumberInput type="number" step="0.01" name="defaultHourlyRate" [(ngModel)]="entity.defaultHourlyRate" />
+                <clr-control-helper>Wird bei Zeitbuchungen vorgeschlagen (übersteuert CompanySettings.defaultHourlyRate).</clr-control-helper>
+              </clr-number-input-container>
+            </form>
+          </clr-tab-content>
+        </clr-tab>
+        <clr-tab *ngIf="featureFlags.companyEdit.showAdditional">
+          <button clrTabLink>{{ 'additional' | translate }}</button>
+          <clr-tab-content *clrIfActive>
+            <form clrForm clrLayout="horizontal" *ngIf="entity">
+              <clr-textarea-container>
+                <label>Notizen</label>
+                <textarea clrTextarea name="notes" [(ngModel)]="entity.notes" rows="6"
+                          placeholder="Interne Notizen zum Kunden — werden NICHT auf Rechnungen angezeigt"></textarea>
+              </clr-textarea-container>
+              <clr-input-container>
+                <label>Interne Referenz</label>
+                <input clrInput name="internalReference" [(ngModel)]="entity.internalReference"
+                       placeholder="z.B. CRM-ID, externer Schlüssel" />
+              </clr-input-container>
+              <div class="tag-section">
+                <label class="tag-label">Tags</label>
+                <app-tag-picker [tagIds]="entity.tagIds" (tagIdsChange)="entity.tagIds = $event"></app-tag-picker>
+              </div>
+              <div class="tag-section">
+                <label class="tag-label">Custom Fields</label>
+                <app-custom-fields [customFields]="entity.customFields"
+                  (customFieldsChange)="entity.customFields = $event"></app-custom-fields>
+              </div>
+            </form>
+          </clr-tab-content>
+        </clr-tab>
+      </clr-tabs>
+    </div>
+  </main>
+</ng-container>

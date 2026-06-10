@@ -1,0 +1,22 @@
+.recurring-form { max-width: 720px; }
+.actions { margin-top: 1.5rem; display: flex; gap: 0.5rem; }
+
+.muted-link {
+  margin-left: 0.5rem;
+  color: #1c4d7c;
+  text-decoration: none;
+  font-size: 0.85rem;
+  &:hover { text-decoration: underline; }
+}
+
+.last-run-info {
+  margin: 0.5rem 0 1rem;
+  padding: 0.6rem 0.85rem;
+  background: #FAFAFA;
+  border-left: 3px solid #1c4d7c;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  color: #4a4a4a;
+  cds-icon { margin-right: 0.3rem; color: #1c4d7c; vertical-align: -2px; }
+  a { color: #1c4d7c; }
+}

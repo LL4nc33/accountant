@@ -1,0 +1,93 @@
+<p *ngIf="loading" class="m-muted">Lädt …</p>
+
+<form *ngIf="!loading" class="m-form" (ngSubmit)="save()">
+
+  <m-form-section title="Stammdaten">
+    <label class="m-field">
+      <span>Anrede</span>
+      <select name="salutation" [(ngModel)]="entity.salutation">
+        <option [ngValue]="null">— ohne —</option>
+        <option value="Herr">Herr</option>
+        <option value="Frau">Frau</option>
+      </select>
+    </label>
+    <label class="m-field">
+      <span>Vorname *</span>
+      <input type="text" name="firstname" [(ngModel)]="entity.firstname" required />
+    </label>
+    <label class="m-field">
+      <span>Nachname *</span>
+      <input type="text" name="lastname" [(ngModel)]="entity.lastname" required />
+    </label>
+    <label class="m-field">
+      <span>Kundennummer</span>
+      <input type="text" name="customerNumber" [(ngModel)]="entity.customerNumber" />
+    </label>
+    <label class="m-field">
+      <span>Geburtstag</span>
+      <input type="date" name="birthdateStr" [(ngModel)]="birthdateStr" />
+    </label>
+    <label class="m-field">
+      <span>UID / USt-ID</span>
+      <input type="text" name="vatId" [(ngModel)]="entity.vatId" placeholder="z.B. ATU12345678" />
+    </label>
+  </m-form-section>
+
+  <m-form-section title="Kontakt">
+    <label class="m-field">
+      <span>E-Mail</span>
+      <input type="email" name="email" [(ngModel)]="entity.email" />
+    </label>
+    <label class="m-field">
+      <span>Telefon</span>
+      <input type="tel" name="phone" [(ngModel)]="entity.phone" />
+    </label>
+  </m-form-section>
+
+  <m-form-section title="Anschrift">
+    <button *ngIf="!primaryAddress" type="button" class="m-pill" (click)="addAddress()">+ Adresse hinzufügen</button>
+    <ng-container *ngIf="primaryAddress">
+      <label class="m-field">
+        <span>Straße</span>
+        <input type="text" name="street" [(ngModel)]="primaryAddress.street" />
+      </label>
+      <label class="m-field">
+        <span>PLZ</span>
+        <input type="text" name="zip" [(ngModel)]="primaryAddress.zip" />
+      </label>
+      <label class="m-field">
+        <span>Stadt</span>
+        <input type="text" name="city" [(ngModel)]="primaryAddress.city" />
+      </label>
+      <label class="m-field">
+        <span>Land</span>
+        <select name="country" [(ngModel)]="primaryAddress.country">
+          <option value="AT">AT</option>
+          <option value="DE">DE</option>
+          <option value="CH">CH</option>
+        </select>
+      </label>
+    </ng-container>
+  </m-form-section>
+
+  <m-form-section title="Zahlungs-Konditionen">
+    <label class="m-field">
+      <span>Zahlungsziel (Tage)</span>
+      <input type="number" min="0" max="365" name="paymentTermsDays" [(ngModel)]="entity.paymentTermsDays" inputmode="numeric" />
+    </label>
+    <label class="m-field">
+      <span>Skonto-Satz (%)</span>
+      <input type="number" min="0" max="100" step="0.5" name="discountPercent" [(ngModel)]="entity.discountPercent" inputmode="decimal" />
+    </label>
+    <label class="m-field">
+      <span>Standard-Stundensatz (€)</span>
+      <input type="number" step="0.01" name="defaultHourlyRate" [(ngModel)]="entity.defaultHourlyRate" inputmode="decimal" />
+    </label>
+  </m-form-section>
+
+  <div class="m-form-actions">
+    <button type="button" class="m-pill" (click)="cancel()">Abbrechen</button>
+    <button type="submit" class="m-pill m-pill-primary" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+  </div>
+
+</form>

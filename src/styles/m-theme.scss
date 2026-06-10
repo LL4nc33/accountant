@@ -1,0 +1,165 @@
+// Mobile-Theme — wird global geladen via angular.json styles[].
+// Variablen sind global verfügbar; Touch-Resets gelten nur innerhalb .m-page
+// + den Mobile-Komponenten damit Desktop-UI unverändert bleibt.
+
+:root {
+  // Touch-Targets
+  --m-touch-min: 48px;
+  --m-tap-target-padding: 12px;
+
+  // Spacings
+  --m-page-padding: 1rem;
+  --m-section-gap: 1.5rem;
+  --m-field-gap: 1.25rem;
+  --m-card-padding: 0.9rem 1rem;
+
+  // Typography (Editorial-konsistent)
+  --m-font-display: Georgia, 'Times New Roman', serif;
+  --m-font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --m-font-mono: 'SF Mono', Menlo, Consolas, monospace;
+
+  // Sizes
+  --m-h1: 1.75rem;
+  --m-h2: 1.3rem;
+  --m-body: 1rem;
+  --m-small: 0.85rem;
+
+  // Topbar
+  --m-topbar-h: 56px;
+  --m-topbar-bg: #1A1A1A;
+  --m-topbar-fg: white;
+
+  // Brand-Akzente
+  --m-color-action: #0072a3;
+  --m-color-success: #2D5A27;
+  --m-color-warning: #B6633E;
+  --m-color-danger: #d62828;
+}
+
+// iOS Tap-Highlight ausschalten + Smooth-Scroll
+m-shell, m-shell * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+m-shell {
+  scroll-behavior: smooth;
+}
+
+// Touch-Min-Sizes auf Mobile-Buttons + Links innerhalb m-shell
+m-shell button:not(.m-topbar-btn):not(.m-drawer-lang-btn):not(.m-drawer-logout),
+m-shell a.btn {
+  min-height: var(--m-touch-min);
+}
+
+// Mobile-Form-Inputs etwas größer + tappable
+m-shell input[type="text"],
+m-shell input[type="email"],
+m-shell input[type="tel"],
+m-shell input[type="number"],
+m-shell input[type="password"],
+m-shell input[type="date"],
+m-shell select,
+m-shell textarea {
+  min-height: 44px;
+  font-size: 1rem; // verhindert iOS-Zoom auf focus (>=16px)
+}
+
+// Standard-Reset um globale Margins zu eliminieren die Editorial-Theme reinbringt
+m-shell h1, m-shell h2, m-shell h3 {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+// Clarity stylt <header>-Elemente global mit dunklem Background — die Mobile-UI
+// nutzt <div role="banner"> für die Topbar, und für alle anderen Container ist
+// <header> ungewollt. Defensiv reset: kein dunkler Background in m-shell-headers
+// außer es ist explizit die Topbar.
+m-shell header:not(.m-topbar) {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+// Clarity setzt globale Link-Farben (#0072A3 default, dunkler bei :visited)
+// die in der Mobile-UI durchschlagen — Branding, Topbar-Title, aktive
+// Nav-Items wirken blau/lila. Wir setzen explizite Farben pro Slot.
+m-shell .m-topbar-title,
+m-shell .m-topbar-title:link,
+m-shell .m-topbar-title:visited {
+  color: var(--m-topbar-fg, white) !important;
+}
+
+m-shell .m-drawer-brand,
+m-shell .m-drawer-brand:link,
+m-shell .m-drawer-brand:visited {
+  color: #1A1A1A !important;
+}
+
+m-shell .m-drawer-link,
+m-shell .m-drawer-link:link,
+m-shell .m-drawer-link:visited,
+m-shell .m-drawer-sublink,
+m-shell .m-drawer-sublink:link,
+m-shell .m-drawer-sublink:visited {
+  color: #1A1A1A !important;
+}
+
+m-shell .m-drawer-link.active,
+m-shell .m-drawer-sublink.active {
+  color: #0072a3 !important;
+}
+
+// Standard-Links innerhalb von Mobile-Content (Customer-Links auf
+// Invoice-View, "Die erste anlegen →" etc) bleiben Accent-Blau,
+// aber sauber konsistent.
+m-shell a:not([class]):link,
+m-shell a:not([class]):visited {
+  color: #0072a3;
+}
+
+// Liste-Card-Heads bleiben dark — manchmal sind die clickable als <a>
+m-shell m-card a,
+m-shell m-card a:link,
+m-shell m-card a:visited {
+  color: #1A1A1A !important;
+}
+
+// Card-Layout: projizierter Content via [card-head]/[card-body] wird Flex
+// damit Label links + Wert rechts auseinander laufen. Muss global stehen
+// weil Angular-Component-Styles den projected content nicht erreichen.
+m-card [card-head], m-card [card-body] {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.8rem;
+  width: 100%;
+}
+m-card [card-head] > span:first-child,
+m-card [card-body] > span:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+m-card [card-head] > span:last-child:not(:first-child),
+m-card [card-body] > span:last-child:not(:first-child) {
+  flex-shrink: 0;
+}
+
+// Generische Mobile-Badge-Styles (von Components wiederverwendet)
+.m-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  background: #E8E8E8;
+  color: #333;
+  font-family: var(--m-font-body);
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.m-badge-success { background: #D4EDDA; color: #2D5A27; }
+  &.m-badge-info { background: #D4EAFF; color: #0072a3; }
+  &.m-badge-warning { background: #FFF1E8; color: #B6633E; }
+  &.m-badge-danger { background: #F8D7DA; color: #721C24; }
+}

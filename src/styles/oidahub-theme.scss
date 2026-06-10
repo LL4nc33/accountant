@@ -1,0 +1,201 @@
+/* OidaHub Kindle-Style Theme Overlay
+ * Overrides Clarity's design tokens with warme Greys,
+ * Georgia Serif Body, system-ui UI, 2px Border-Radius.
+ *
+ * IMPORTANT: This overlay only OVERRIDES Clarity CSS variables;
+ * the underlying @clr/ui framework continues to drive all components.
+ */
+
+:root {
+  // OidaHub Kindle-Style Color Palette overrides
+  --clr-color-neutral-100: #FAFAFA;
+  --clr-color-neutral-200: #F5F5F5;
+  --clr-color-neutral-300: #E8E8E8;
+  --clr-color-neutral-400: #CCCCCC;
+  --clr-color-neutral-500: #999999;
+  --clr-color-neutral-600: #666666;
+  --clr-color-neutral-700: #4A4A4A;
+  --clr-color-neutral-800: #2F2F2F;
+  --clr-color-neutral-900: #1A1A1A;
+
+  // Action color (primary buttons) - dark grey instead of Clarity blue
+  --clr-color-action-50:  #F5F5F5;
+  --clr-color-action-100: #E8E8E8;
+  --clr-color-action-200: #CCCCCC;
+  --clr-color-action-500: #4A4A4A;
+  --clr-color-action-600: #2F2F2F;
+  --clr-color-action-700: #1A1A1A;
+  --clr-color-action-800: #1A1A1A;
+  --clr-color-action-900: #000000;
+
+  // Success / Warning / Error - warmer, muted
+  --clr-color-success-700: #2D5A27;
+  --clr-color-warning-700: #8B4513;
+  --clr-color-error-700:   #5D2E2E;
+
+  // Borders & radius
+  --clr-global-borderradius: 2px;
+}
+
+// Typography
+// Increase specificity so Georgia wins over Clarity's default
+// `body, .content-area { font-family: Metropolis, ... }` overrides.
+body, body.main-container, body .content-area, body .main-container,
+html body {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  background-color: #FAFAFA !important;
+  color: #1A1A1A !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.btn, label, button, input, select, textarea,
+.clr-vertical-nav, .header-6,
+clr-vertical-nav, clr-dropdown-menu,
+.clr-control-label, .clr-control-helper {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+
+// Sidebar Group-Sub-Menüs: Clarity macht zwei Snaps gleichzeitig — Wrapper-Div
+// kriegt inline `height:0; visibility:hidden`, und das innere
+// `clr-vertical-nav-group-children` flippt auf `visibility:hidden`. Ohne
+// Override sieht der User den Text instant verschwinden bevor irgendwas
+// animiert. Wir tacken beide auf `visibility:visible` fest und animieren den
+// Wrapper per max-height symmetrisch über die `is-expanded`-Klasse.
+div.nav-group-children,
+clr-vertical-nav-group-children {
+  visibility: visible !important;
+}
+
+div.nav-group-children {
+  max-height: 0 !important;
+  height: auto !important;
+  overflow: hidden !important;
+  transition: max-height 0.22s ease-in-out !important;
+}
+
+clr-vertical-nav-group.is-expanded div.nav-group-children {
+  max-height: 500px !important;  // großzügig, schluckt jede realistische Sub-Liste
+}
+
+// Tighter card shadows
+.card, .invoice-item-card, .pm-page .clr-datagrid {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+// H1 with subtle underline (kindle.css pattern)
+.main-container h1, .main-container h2 {
+  font-weight: 500;
+  border-bottom: 1px solid #E8E8E8;
+  padding-bottom: 0.5rem;
+}
+
+// Datagrid: warm-grey row hover, no harsh blue selection
+.clr-datagrid {
+  background: #FFFFFF;
+  .datagrid-row:hover {
+    background-color: #F5F5F5 !important;
+  }
+  .datagrid-header {
+    background-color: #FAFAFA;
+    font-family: system-ui, -apple-system, sans-serif !important;
+    font-weight: 500;
+  }
+}
+
+// Tighter form spacing
+.clr-form.clr-form-horizontal .clr-form-control {
+  margin-top: 0.4rem;
+}
+
+// Subtle borders on all inputs
+input.clr-input, textarea.clr-textarea, select.clr-select {
+  border-color: #CCCCCC !important;
+}
+input.clr-input:focus, textarea.clr-textarea:focus, select.clr-select:focus {
+  border-color: #666666 !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
+}
+
+// Toast (ngx-toastr): warm tones
+.toast-success { background: #2D5A27 !important; }
+.toast-error { background: #5D2E2E !important; }
+.toast-warning { background: #8B4513 !important; }
+.toast-info { background: #4A5568 !important; }
+
+// Buttons: bigger touch-targets, less harsh. Clarity macht .btn standardmäßig
+// uppercase + letter-spacing — wir wollen Sentence-Case ("Neue Rechnung" statt
+// "NEUE RECHNUNG") + normalen Buchstabenabstand.
+.btn {
+  font-family: system-ui, -apple-system, sans-serif !important;
+  font-weight: 500 !important;
+  border-radius: 3px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+// Page-Title h1: Clarity-Default ist ~2.5rem mit thin-weight. Für Listen-
+// seiten (Rechnungen, Kunden, Mahnungen, …) wollen wir das dezenter — mehr
+// Platz für den eigentlichen Inhalt. Einzelne Pages mit Hero (z.B. Login)
+// können das per eigenem class-Selector überschreiben.
+// Globaler Page-Title h1 — alle Listenseiten dezenter. Login/Empty-Hero-
+// Komponenten überschreiben das per eigenem class-Selector falls Bigger
+// gewünscht ist.
+body h1 {
+  font-size: 1.45rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  color: #111 !important;
+  line-height: 1.2 !important;
+  margin: 0 0 0.5rem !important;
+  border-bottom: none !important;
+}
+.btn-primary {
+  background-color: #2F2F2F !important;
+  border-color: #2F2F2F !important;
+}
+.btn-primary:hover {
+  background-color: #4A4A4A !important;
+  border-color: #4A4A4A !important;
+}
+
+// Chat-Vollbild (/chat): Claritys .content-area scrollt sonst zusätzlich zum
+// Chat + Verlauf (dritter Scrollbalken). Für die Chat-Seite randlos + ohne
+// Eigen-Scroll — dann scrollen nur die Nachrichten und die Verlauf-Spalte.
+.content-area:has(app-chat-page) {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+// Alert: muted backgrounds
+.alert.alert-info { background: #F5F5F5; border-left: 3px solid #4A5568; }
+.alert.alert-warning { background: #F5F5F5; border-left: 3px solid #8B4513; }
+.alert.alert-success { background: #F5F5F5; border-left: 3px solid #2D5A27; }
+.alert.alert-danger, .alert.alert-error { background: #F5F5F5; border-left: 3px solid #5D2E2E; }
+
+// Page-Head: einheitliches Layout für Listenseiten — Titel/Subtitle links,
+// Action-Buttons oben rechts. Auf schmalen Screens (Wrap) springen die
+// Actions unter den Text. Alle Listenseiten (Anlagen, Reisekosten, Kassabuch,
+// ZM, ESt-Vorschau, SVS-Vorschau, …) nutzen dieses Pattern.
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+
+  .page-head-text {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    h1 { margin: 0 0 0.4rem; font-size: 1.4rem; font-weight: 600; }
+    p { margin: 0; max-width: 720px; font-size: 0.9rem; color: var(--clr-color-neutral-600, #666); }
+  }
+  .page-head-actions {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+}

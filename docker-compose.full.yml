@@ -1,0 +1,131 @@
+# accountant — full self-hosted stack, pre-wired:
+#   • accountant            the app (port 6002)
+#   • ollama           local LLM backend for the KI-Assistent (OpenAI-compatible)
+#   • paperless-ngx    document management, integrated into accountant's Ausgaben/Belege
+#       └ postgres, redis, gotenberg, tika   (Paperless dependencies)
+#
+# Quick start:
+#   1. cp .env.example .env      # then edit the secrets (SESSION_SECRET, DB + paperless admin pw)
+#   2. docker compose -f docker-compose.full.yml up -d
+#   3. Pull a small model for the assistant (one-time):
+#        docker compose -f docker-compose.full.yml exec ollama ollama pull llama3.2:3b
+#   4. Open Paperless once (http://localhost:8000), create an API token under
+#      "My Profile", put it into PAPERLESS_TOKEN in .env, then:
+#        docker compose -f docker-compose.full.yml up -d accountant
+#   5. Open accountant: http://localhost:6002   (first login admin / admin → change it!)
+#
+# accountant auto-configures the LLM + Paperless connection from the env vars below,
+# so it works out of the box (you only add the Paperless token once).
+
+services:
+  accountant:
+    build: .
+    # image: ghcr.io/ll4nc33/accountant:latest
+    container_name: accountant
+    ports:
+      - "6002:6002"
+    volumes:
+      - accountant-data:/app/data
+    environment:
+      SESSION_SECRET: ${SESSION_SECRET:?Please set SESSION_SECRET in .env}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      # KI-Assistent → Ollama (OpenAI-compatible endpoint). Pre-configured.
+      LLM_BASE_URL: http://ollama:11434/v1
+      LLM_MODEL: ${LLM_MODEL:-llama3.2:3b}
+      # Paperless-ngx — URL is pre-wired; add the API token to .env after first start.
+      PAPERLESS_URL: http://paperless-webserver:8000
+      PAPERLESS_TOKEN: ${PAPERLESS_TOKEN:-}
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: accountant-ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    # Expose only if you want to reach Ollama from the host as well:
+    # ports:
+    #   - "11434:11434"
+    restart: unless-stopped
+    # For NVIDIA GPU acceleration, uncomment (requires nvidia-container-toolkit):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # ── Paperless-ngx + dependencies ───────────────────────────────────────────
+  paperless-broker:
+    image: redis:7-alpine
+    container_name: accountant-paperless-redis
+    volumes:
+      - paperless-redis:/data
+    restart: unless-stopped
+
+  paperless-db:
+    image: postgres:16-alpine
+    container_name: accountant-paperless-db
+    volumes:
+      - paperless-db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: ${PAPERLESS_DB_PASSWORD:?Please set PAPERLESS_DB_PASSWORD in .env}
+    restart: unless-stopped
+
+  paperless-gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: accountant-paperless-gotenberg
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+    restart: unless-stopped
+
+  paperless-tika:
+    image: ghcr.io/paperless-ngx/tika:latest
+    container_name: accountant-paperless-tika
+    restart: unless-stopped
+
+  paperless-webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: accountant-paperless
+    depends_on:
+      - paperless-db
+      - paperless-broker
+      - paperless-gotenberg
+      - paperless-tika
+    ports:
+      - "8000:8000"
+    volumes:
+      - paperless-data:/usr/src/paperless/data
+      - paperless-media:/usr/src/paperless/media
+      - paperless-export:/usr/src/paperless/export
+      - paperless-consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://paperless-broker:6379
+      PAPERLESS_DBHOST: paperless-db
+      PAPERLESS_DBNAME: paperless
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: ${PAPERLESS_DB_PASSWORD:?Please set PAPERLESS_DB_PASSWORD in .env}
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://paperless-gotenberg:3000
+      PAPERLESS_TIKA_ENDPOINT: http://paperless-tika:9998
+      PAPERLESS_URL: ${PAPERLESS_PUBLIC_URL:-http://localhost:8000}
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-deu+eng}
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD:?Please set PAPERLESS_ADMIN_PASSWORD in .env}
+    restart: unless-stopped
+
+volumes:
+  accountant-data:
+  ollama-data:
+  paperless-redis:
+  paperless-db:
+  paperless-data:
+  paperless-media:
+  paperless-export:
+  paperless-consume:

@@ -1,0 +1,94 @@
+.m-customer-head {
+  margin-bottom: 1rem;
+}
+
+.m-customer-name {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.7rem;
+  margin: 0 0 0.3rem;
+  line-height: 1.2;
+}
+
+.m-customer-meta {
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.m-customer-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.m-pill {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: white;
+  border: 1px solid #DCDCDC;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #1A1A1A;
+  text-decoration: none;
+  white-space: nowrap;
+  min-height: 36px;
+  line-height: 1.2;
+
+  &.m-pill-add {
+    border-color: #0072a3;
+    color: #0072a3;
+  }
+}
+
+.m-kv {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+
+  dt {
+    color: #888;
+    font-size: 0.85rem;
+  }
+  dd {
+    margin: 0;
+    font-size: 0.95rem;
+    a { color: #0072a3; text-decoration: none; }
+  }
+}
+
+.m-address {
+  background: white;
+  border: 1px solid #E8E8E8;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.m-storno {
+  color: #B6633E;
+  font-size: 0.75rem;
+  margin-left: 0.3rem;
+  background: #FFF1E8;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.m-muted, .m-muted-small {
+  color: #888;
+}
+
+.m-muted {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.m-muted-small {
+  font-size: 0.9rem;
+  margin: 0;
+}

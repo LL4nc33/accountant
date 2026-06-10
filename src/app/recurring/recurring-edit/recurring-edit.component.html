@@ -1,0 +1,66 @@
+<main *ngIf="entity">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>{{ isNew ? 'Neuer Wiederkehrend-Eintrag' : 'Wiederkehrend bearbeiten' }}</h1>
+    </div>
+    <div class="page-head-actions">
+      <button class="btn btn-danger-outline" type="button" *ngIf="!isNew" (click)="deleteEntry()">Löschen</button>
+      <a class="btn btn-outline" routerLink="/recurring">Abbrechen</a>
+      <button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+    </div>
+  </div>
+
+  <form clrForm clrLayout="horizontal" (ngSubmit)="save()" class="recurring-form">
+    <clr-input-container>
+      <label>Bezeichnung (intern)</label>
+      <input clrInput name="title" [(ngModel)]="entity.title" required />
+      <clr-control-helper>Z.B. „Wartungspauschale Kunde X" — wird nur intern angezeigt.</clr-control-helper>
+    </clr-input-container>
+
+    <clr-select-container>
+      <label>Vorlage-Rechnung</label>
+      <select clrSelect name="templateInvoiceId" [(ngModel)]="entity.templateInvoiceId">
+        <option [ngValue]="''">— wählen —</option>
+        <option *ngFor="let t of templates" [value]="t.id">{{ t.label }}</option>
+      </select>
+      <clr-control-helper>
+        Bei jeder Ausführung wird eine Kopie als Entwurf angelegt.
+        <a *ngIf="entity.templateInvoiceId"
+           [routerLink]="['/om/invoice', entity.templateInvoiceId]"
+           target="_blank" class="muted-link">
+          Vorlage öffnen <cds-icon shape="pop-out" size="11"></cds-icon>
+        </a>
+      </clr-control-helper>
+    </clr-select-container>
+
+    <div *ngIf="!isNew && entity.lastRunDate" class="last-run-info">
+      <cds-icon shape="history" size="14"></cds-icon>
+      Letzte Ausführung: <strong>{{ entity.lastRunDate | date:'dd.MM.yyyy' }}</strong>
+      — generierte Rechnungen findest du in der
+      <a routerLink="/om/invoice">Rechnungs-Übersicht</a>
+      (Filter nach Titel „{{ entity.title }}").
+    </div>
+
+    <clr-select-container>
+      <label>Intervall</label>
+      <select clrSelect name="interval" [(ngModel)]="entity.interval">
+        <option *ngFor="let i of intervals" [value]="i">{{ i }}</option>
+      </select>
+    </clr-select-container>
+
+    <clr-date-container>
+      <label>Nächste Ausführung</label>
+      <input type="date" clrDate name="nextRunDate" [(clrDate)]="entity.nextRunDate" />
+    </clr-date-container>
+
+    <clr-toggle-container>
+      <label>Aktiv</label>
+      <clr-toggle-wrapper>
+        <input type="checkbox" clrToggle name="active" [(ngModel)]="entity.active" />
+      </clr-toggle-wrapper>
+      <clr-control-helper>Pausieren statt löschen, wenn du den Eintrag später reaktivieren willst.</clr-control-helper>
+    </clr-toggle-container>
+
+    <button type="submit" hidden></button>
+  </form>
+</main>

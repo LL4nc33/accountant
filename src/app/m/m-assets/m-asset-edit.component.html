@@ -1,0 +1,59 @@
+<p *ngIf="loading" class="m-muted">Lädt…</p>
+
+<form *ngIf="!loading && asset" class="m-form" (ngSubmit)="save()">
+  <m-form-section title="Stammdaten">
+    <label class="m-field">
+      <span>Bezeichnung</span>
+      <input type="text" name="name" [(ngModel)]="asset.name" required />
+    </label>
+    <label class="m-field">
+      <span>Kategorie</span>
+      <select name="category" [(ngModel)]="asset.category">
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
+    </label>
+    <label class="m-field">
+      <span>Anschaffungsdatum</span>
+      <input type="date" name="acquisitionDate" [(ngModel)]="asset.acquisitionDate" />
+    </label>
+    <label class="m-field">
+      <span>Anschaffungskosten netto (EUR)</span>
+      <input type="number" step="0.01" name="acquisitionCost" [(ngModel)]="asset.acquisitionCost" (ngModelChange)="onCostChange()" inputmode="decimal" />
+    </label>
+    <label class="m-field">
+      <span>Nutzungsdauer (Jahre)</span>
+      <input type="number" step="1" name="usefulLifeYears" [(ngModel)]="asset.usefulLifeYears" [disabled]="asset.isGwg" inputmode="numeric" />
+    </label>
+    <label class="m-field">
+      <input type="checkbox" name="isGwg" [(ngModel)]="asset.isGwg" /> GWG (Sofortabschreibung)
+    </label>
+  </m-form-section>
+
+  <m-form-section title="Abgang (optional)">
+    <label class="m-field">
+      <span>Abgangsdatum</span>
+      <input type="date" name="disposalDate" [(ngModel)]="asset.disposalDate" />
+    </label>
+    <label class="m-field">
+      <span>Erlös (EUR)</span>
+      <input type="number" step="0.01" name="disposalAmount" [(ngModel)]="asset.disposalAmount" inputmode="decimal" />
+    </label>
+  </m-form-section>
+
+  <m-form-section title="Sonstiges">
+    <label class="m-field">
+      <span>Anmerkungen</span>
+      <textarea name="notes" [(ngModel)]="asset.notes" rows="3"></textarea>
+    </label>
+    <label class="m-field">
+      <span>Beleg (Expense-ID)</span>
+      <input type="text" name="sourceExpenseId" [(ngModel)]="asset.sourceExpenseId" />
+    </label>
+  </m-form-section>
+
+  <div class="m-form-actions">
+    <button type="submit" class="m-pill m-pill-primary" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+    <button type="button" class="m-pill" (click)="toggleArchive()" *ngIf="!isNew">{{ asset.archived ? 'Reaktivieren' : 'Archivieren' }}</button>
+    <a routerLink="/m/assets" class="m-pill">Abbrechen</a>
+  </div>
+</form>

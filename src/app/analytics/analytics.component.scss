@@ -1,0 +1,219 @@
+.analytics-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+
+  .vs-prev {
+    font-family: system-ui, sans-serif;
+    font-size: 0.85rem;
+  }
+  .period-picker {
+    margin-left: auto;
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .muted { color: var(--clr-color-neutral-600, #666); }
+}
+
+.year-picker, .month-picker, .granularity-picker {
+  padding: 5px 10px;
+  font-family: system-ui, -apple-system, sans-serif;
+  border: 1px solid #DDD;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #111;
+  cursor: pointer;
+
+  &:hover { border-color: #888; }
+}
+.year-picker, .month-picker { font-variant-numeric: tabular-nums; }
+
+.loading-state { color: var(--clr-color-neutral-600, #666); font-style: italic; }
+.error-box {
+  padding: 0.75rem 1rem;
+  background: var(--clr-color-danger-100, #fbeaea);
+  border-left: 3px solid var(--clr-color-danger-600, #c92100);
+  color: var(--clr-color-danger-700, #8b0000);
+  margin: 1rem 0;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.85rem;
+  max-width: 1200px;
+  margin-bottom: 1.25rem;
+}
+
+.status-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: var(--clr-color-neutral-100, #fafafa);
+  border-left: 4px solid var(--clr-color-neutral-400, #ccc);
+  border-radius: 2px;
+  min-width: 120px;
+
+  .num {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: Georgia, serif;
+    color: var(--clr-color-neutral-900, #1a1a1a);
+    font-variant-numeric: tabular-nums;
+  }
+  .lbl { font-size: 0.78rem; color: var(--clr-color-neutral-700, #4a4a4a); }
+
+  &.draft { border-left-color: var(--clr-color-neutral-500, #888); }
+  &.open { border-left-color: var(--clr-color-warning-600, #b97500); .num { color: var(--clr-color-warning-800, #7d5100); } }
+  &.paid { border-left-color: var(--clr-color-success-600, #318700); .num { color: var(--clr-color-success-700, #266100); } }
+  &.overdue { border-left-color: var(--clr-color-danger-600, #c92100); .num { color: var(--clr-color-danger-700, #8b0000); } }
+}
+
+h2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.monthly-chart {
+  position: relative;
+  max-width: 760px;
+  background: white;
+  border: 1px solid var(--clr-color-neutral-300, #e0e0e0);
+  border-radius: 4px;
+  padding: 1rem 1.25rem 1.25rem;
+
+  .chart-svg {
+    width: 100%;
+    height: 200px;
+    display: block;
+
+    .month-group { cursor: default; }
+    .hit-area { fill: transparent; }
+    .bar { transition: opacity 0.15s, fill 0.15s; }
+    .bar.active { opacity: 1; filter: brightness(1.15); }
+    .month-group:hover .bar:not(.active) { opacity: 0.55; }
+    .bar-invoiced { fill: var(--clr-color-action-600, #2f2f2f); }
+    .bar-expense { fill: var(--clr-color-warning-600, #b97500); }
+    .label { font-size: 11px; fill: var(--clr-color-neutral-700, #4a4a4a); font-family: system-ui, sans-serif; }
+  }
+
+  // Tooltip schwebt absolut über dem Chart, x-Position folgt der Bucket-Mitte
+  // (left wird inline gesetzt). pointer-events:none verhindert dass das Tooltip
+  // selbst mouseleave-Events feuert wenn der Cursor drüberzieht.
+  //
+  // Fixe Größe + nowrap auf Key/Val: das Tooltip ist immer exakt gleich groß
+  // und Werte umbrechen nicht (sonst „Fakturiert 1.234,56 €" zweizeilig sobald
+  // die Beträge vierstellig werden).
+  .chart-tooltip {
+    position: absolute;
+    top: 0.5rem;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: white;
+    padding: 0.55rem 0.75rem;
+    border-radius: 3px;
+    font-family: system-ui, sans-serif;
+    font-size: 0.82rem;
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    width: 200px;
+    box-sizing: border-box;
+
+    .tt-label { font-weight: 600; margin-bottom: 0.35rem; font-size: 0.85rem; white-space: nowrap; }
+    .tt-row {
+      display: grid;
+      grid-template-columns: 10px 1fr auto;
+      align-items: center;
+      gap: 0.4rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.4;
+    }
+    .tt-swatch { width: 10px; height: 10px; border-radius: 1px; }
+    .tt-key { color: rgba(255, 255, 255, 0.7); white-space: nowrap; }
+    .tt-val { color: white; font-weight: 500; white-space: nowrap; }
+    .swatch-invoiced { background: var(--clr-color-action-600, #2f2f2f); border: 1px solid rgba(255,255,255,0.4); }
+    .swatch-paid { background: var(--clr-color-success-600, #318700); }
+    .swatch-expense { background: var(--clr-color-warning-600, #b97500); }
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--clr-color-neutral-700, #4a4a4a);
+
+    .legend-swatch {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 0.3rem;
+      vertical-align: middle;
+    }
+    .swatch-invoiced { background: var(--clr-color-action-600, #2f2f2f); }
+    .swatch-expense { background: var(--clr-color-warning-600, #b97500); }
+    .muted { margin-left: auto; color: var(--clr-color-neutral-600, #666); }
+  }
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+  max-width: 1080px;
+}
+
+.card {
+  background: white;
+  border: 1px solid var(--clr-color-neutral-300, #e0e0e0);
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
+
+  h2 { margin-top: 0; }
+}
+
+.ranked-row {
+  margin-bottom: 0.85rem;
+
+  .row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.2rem;
+
+    .row-name { font-size: 0.92rem; font-weight: 500; color: var(--clr-color-neutral-900, #1a1a1a); }
+    .row-value { font-size: 0.92rem; font-variant-numeric: tabular-nums; font-weight: 600; }
+  }
+  .row-bar-track {
+    height: 6px;
+    background: var(--clr-color-neutral-200, #f3f3f3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .row-bar {
+    height: 100%;
+    background: var(--clr-color-action-600, #2f2f2f);
+    &.row-bar-expense { background: var(--clr-color-warning-600, #b97500); }
+  }
+  .row-sub { font-size: 0.78rem; margin-top: 0.15rem; }
+}
+
+.muted { color: var(--clr-color-neutral-600, #666); }

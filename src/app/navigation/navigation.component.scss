@@ -1,0 +1,163 @@
+// Sidebar als Vollhoehen-Flex-Container — so kann der Spacer Settings + User
+// ans untere Ende schieben.
+clr-vertical-nav.oa-nav {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// Branding-Block oben — ersetzt den vormaligen Top-Header.
+.oa-brand,
+.oa-brand:link,
+.oa-brand:visited {
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  margin: 0 0 0.4rem 0;
+  text-decoration: none;
+  color: #1A1A1A !important;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-bottom: 1px solid #E8E8E8;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+}
+
+.oa-brand-icon {
+  margin-right: 0.55rem;
+  color: var(--clr-color-action-700, #0072a3);
+}
+
+.oa-brand-name {
+  line-height: 1;
+}
+
+// Flexible Lueke — schiebt alles danach ans untere Ende
+.oa-nav-spacer {
+  flex: 1 1 auto;
+  min-height: 1rem;
+}
+
+// User-Zeile am Boden
+.oa-user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
+  color: #444;
+  border-top: 1px solid #E8E8E8;
+  flex-shrink: 0;
+}
+
+.oa-user-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.oa-logout {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 0.15rem 0.35rem;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: #d62828;
+  }
+}
+
+// Sprache als kleine Buttons am Boden
+.oa-lang {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 1rem 0.65rem;
+  font-size: 0.75rem;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.oa-lang-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+
+  &:hover { color: #1A1A1A; }
+  &.active { font-weight: 700; color: #1A1A1A; }
+}
+
+.oa-lang-sep {
+  color: #BBB;
+}
+
+// Wenn Sidebar collapsed: Text-Elemente verstecken, Icons + Buttons bleiben
+// zentriert. Clarity setzt die Klasse .is-collapsed automatisch auf clr-vertical-nav.
+clr-vertical-nav.is-collapsed {
+  .oa-brand-name,
+  .oa-user-name,
+  .oa-lang-sep { display: none !important; }
+
+  .oa-user-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--clr-color-neutral-300, #e0e0e0);
+
+    // User-Icon kleiner halten, Ausloggen-Button bleibt klickbar
+    .oa-logout {
+      padding: 0.35rem;
+    }
+  }
+
+  // Sprachschalter zur kompakten DE/EN-Spalte umbauen
+  .oa-lang {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--clr-color-neutral-300, #e0e0e0);
+  }
+  .oa-lang-btn {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.35rem;
+  }
+
+  .oa-brand {
+    justify-content: center;
+    padding: 0.85rem 0;
+  }
+  .oa-brand-icon { margin-right: 0; }
+
+  // Spacer braucht keine min-height-Tricks im collapsed-mode
+  .oa-nav-spacer { flex: 1 1 auto; min-height: 1rem; }
+}
+
+// Im erweiterten Zustand sicherstellen dass die User-Row + Lang-Block
+// nicht über die Sidebar-Breite hinausragen (clarity-internal-stretch).
+.oa-user-row {
+  overflow: hidden;
+  max-width: 100%;
+}
+.oa-user-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,0 +1,101 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Backups</h1>
+  </div>
+  <div class="page-head-actions"></div>
+</div>
+
+<main>
+  <p class="hint">
+    Automatische SQLite-Snapshots — alle 24 Stunden, mit Retention
+    7 Tage / 4 Wochen / 12 Monate. Snapshots liegen im DATA_DIR und
+    sollten zusätzlich per Cron/rsync off-site gesichert werden.
+  </p>
+
+  <div class="error-box" *ngIf="error">{{ error }}</div>
+
+  <section class="actions" *ngIf="data">
+    <button class="btn btn-primary" (click)="triggerNow()" [disabled]="busy">
+      <cds-icon shape="backup" *ngIf="!busy"></cds-icon>
+      <cds-icon shape="sync" *ngIf="busy"></cds-icon>
+      {{ busy ? 'Snapshot läuft…' : 'Jetzt sichern' }}
+    </button>
+    <button class="btn btn-secondary" (click)="load()" [disabled]="loading">
+      <cds-icon shape="refresh"></cds-icon>
+      Liste neu laden
+    </button>
+  </section>
+
+  <section class="summary" *ngIf="data">
+    <div class="summary-card">
+      <div class="card-label">Snapshots</div>
+      <div class="card-value">{{ data.count }}</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Gesamt-Größe</div>
+      <div class="card-value">{{ fmtSize(data.totalSize) }}</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Retention</div>
+      <div class="card-value-small">
+        {{ data.retention.daily }} täglich /
+        {{ data.retention.weekly }} wöchentlich /
+        {{ data.retention.monthly }} monatlich
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Verzeichnis</div>
+      <div class="card-value-small code">{{ data.backupDir }}</div>
+    </div>
+  </section>
+
+  <table class="snap-table" *ngIf="data && data.snapshots.length">
+    <thead>
+      <tr>
+        <th>Snapshot</th>
+        <th>Erstellt</th>
+        <th class="num">Größe</th>
+        <th>Retention</th>
+        <th class="actions-col">Aktionen</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of data.snapshots">
+        <td class="code">{{ s.name }}</td>
+        <td>{{ fmtDate(s.mtime) }}</td>
+        <td class="num">{{ fmtSize(s.size) }}</td>
+        <td><span class="age-pill" [ngClass]="ageClass(s.age)">{{ ageLabel(s.age) }}</span></td>
+        <td>
+          <button class="btn btn-sm btn-link" (click)="download(s.name)">
+            <cds-icon shape="download"></cds-icon> Download
+          </button>
+          <button class="btn btn-sm btn-link danger" (click)="remove(s.name)">
+            <cds-icon shape="trash"></cds-icon> Löschen
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="empty-state" *ngIf="data && !data.snapshots.length">
+    Keine Snapshots vorhanden. Der erste Snapshot wird ca. 30 Sekunden nach
+    Server-Start automatisch erzeugt — oder du klickst „Jetzt sichern".
+  </p>
+
+  <details class="restore-hint">
+    <summary>Wie stelle ich ein Backup wieder her?</summary>
+    <ol>
+      <li>Container stoppen: <code>docker stop oa</code></li>
+      <li>Snapshot herunterladen oder direkt im DATA_DIR finden:
+        <code>{{ data?.backupDir }}/oa-YYYY-MM-DDTHHmmss.sqlite</code></li>
+      <li>SQLite-File über die Live-DB kopieren:
+        <code>cp &lt;snapshot&gt; $DATA_DIR/db/accountant.sqlite</code></li>
+      <li>Container wieder starten: <code>docker start oa</code></li>
+    </ol>
+    <p class="muted">
+      Die Snapshots sind echte, vollständige SQLite-Dateien — kein Diff,
+      kein Konzept-Hokuspokus. Du kannst sie mit jedem SQLite-Client öffnen
+      (DB Browser for SQLite, DBeaver, sqlite3 CLI).
+    </p>
+  </details>
+</main>

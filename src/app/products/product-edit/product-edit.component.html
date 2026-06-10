@@ -1,0 +1,58 @@
+<main *ngIf="entity">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>{{ isNew ? 'Neues Produkt' : 'Produkt bearbeiten' }}<span *ngIf="entity.archived" class="label" style="margin-left:0.75rem">Archiviert</span></h1>
+    </div>
+    <div class="page-head-actions">
+      <button class="btn btn-danger-outline" type="button" *ngIf="!isNew && entity.archived" (click)="deleteProduct()">Endgültig löschen</button>
+      <button class="btn btn-outline" type="button" *ngIf="!isNew" (click)="toggleArchive()">
+        {{ entity.archived ? 'Reaktivieren' : 'Archivieren' }}
+      </button>
+      <a class="btn btn-outline" routerLink="/products">Abbrechen</a>
+      <button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+    </div>
+  </div>
+
+  <clr-alert *ngIf="entity.archived" clrAlertType="info" [clrAlertClosable]="false">
+    <clr-alert-item>
+      <span class="alert-text">
+        Dieses Produkt ist archiviert und erscheint nicht mehr im Picker beim Schreiben neuer Rechnungen. Bestehende Rechnungs-Positionen sind nicht betroffen.
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+
+  <form clrForm clrLayout="horizontal" (ngSubmit)="save()" class="product-form">
+    <clr-input-container>
+      <label>Name</label>
+      <input clrInput name="name" [(ngModel)]="entity.name" required />
+      <clr-control-helper>Z.B. „Beratungsstunde", „Wartungspauschale Monat"</clr-control-helper>
+    </clr-input-container>
+
+    <clr-textarea-container>
+      <label>Beschreibung</label>
+      <textarea clrTextarea name="description" [(ngModel)]="entity.description" rows="3"></textarea>
+      <clr-control-helper>Wird als Default-Beschreibung in die Rechnungsposition übernommen.</clr-control-helper>
+    </clr-textarea-container>
+
+    <clr-select-container>
+      <label>Einheit</label>
+      <select clrSelect name="unit" [(ngModel)]="entity.unit">
+        <option *ngFor="let u of units" [value]="u">{{ u }}</option>
+      </select>
+    </clr-select-container>
+
+    <clr-number-input-container>
+      <label>Standard-Preis (netto)</label>
+      <input clrNumberInput type="number" step="0.01" name="defaultPrice" [(ngModel)]="entity.defaultPrice" />
+      <clr-control-helper>EUR. Pro Rechnung überschreibbar.</clr-control-helper>
+    </clr-number-input-container>
+
+    <clr-number-input-container>
+      <label>Standard-USt-Satz</label>
+      <input clrNumberInput type="number" step="0.5" name="defaultVat" [(ngModel)]="entity.defaultVat" />
+      <clr-control-helper>Prozent. Pro Rechnung überschreibbar.</clr-control-helper>
+    </clr-number-input-container>
+
+    <button type="submit" hidden></button>
+  </form>
+</main>

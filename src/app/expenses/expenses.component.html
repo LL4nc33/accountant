@@ -1,0 +1,99 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Ausgaben</h1>
+    <p>Eingangsrechnungen und sonstige Betriebsausgaben. Fundament für die Einnahmen-Ausgaben-Rechnung.</p>
+  </div>
+  <div class="page-head-actions">
+    <clr-checkbox-wrapper>
+      <input type="checkbox" clrCheckbox name="showArchivedExp"
+             [(ngModel)]="showArchived" (ngModelChange)="reload()" />
+      <label>Archivierte anzeigen</label>
+    </clr-checkbox-wrapper>
+    <a class="btn btn-primary" routerLink="/expenses/new/edit">+ Neue Ausgabe</a>
+  </div>
+</div>
+
+<main>
+
+  <!-- KPI-Cards für den aktuell gefilterten Zeitraum -->
+  <section class="kpi-grid" *ngIf="!loading && filtered.length > 0">
+    <app-kpi-card
+      label="Brutto · gefiltert"
+      [value]="(totalGross | number:'1.2-2':'de-AT') + ' €'"
+      [subtitle]="filtered.length + ' Belege'"
+      variant="primary"></app-kpi-card>
+    <app-kpi-card
+      label="Netto"
+      [value]="(totalNet | number:'1.2-2':'de-AT') + ' €'"
+      subtitle="Bemessungsgrundlage"
+      variant="default"></app-kpi-card>
+    <app-kpi-card
+      label="Vorsteuer"
+      [value]="(totalVat | number:'1.2-2':'de-AT') + ' €'"
+      subtitle="abzugsfähig"
+      variant="success"></app-kpi-card>
+    <app-kpi-card *ngIf="topCategory"
+      label="Top-Kategorie"
+      [value]="topCategory.category"
+      [subtitle]="(topCategory.gross | number:'1.2-2':'de-AT') + ' € brutto'"
+      variant="neutral"></app-kpi-card>
+    <app-kpi-card *ngIf="unpaidCount > 0"
+      label="Unbezahlt"
+      [value]="unpaidCount.toString()"
+      subtitle="zur Zahlung offen"
+      variant="warning"></app-kpi-card>
+  </section>
+
+  <div class="period-bar" *ngIf="!loading && rows.length > 0">
+    <label>Jahr:
+      <select [(ngModel)]="selectedYear" name="selectedYear">
+        <option *ngFor="let y of availableYears" [ngValue]="y">{{ y }}</option>
+      </select>
+    </label>
+    <label>Monat:
+      <select [(ngModel)]="selectedMonth" name="selectedMonth">
+        <option [ngValue]="'all'">— alle —</option>
+        <option *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]" [ngValue]="m">{{ monthLabel(m) }}</option>
+      </select>
+    </label>
+    <span class="muted">{{ filtered.length }} Einträge</span>
+  </div>
+
+  <app-empty-state
+    *ngIf="!loading && rows.length === 0"
+    icon="dollar-bill"
+    title="Noch keine Ausgaben erfasst"
+    text="Lege Eingangsrechnungen und sonstige Betriebsausgaben hier ab — sie fließen in die Einnahmen-Ausgaben-Rechnung und können später per Knopfdruck ans Finanzamt exportiert werden."
+    ctaLabel="+ Neue Ausgabe"
+    [ctaRouterLink]="['/expenses/new/edit']"
+  ></app-empty-state>
+
+  <clr-datagrid *ngIf="!loading && filtered.length > 0">
+    <clr-dg-column style="width: 110px">Datum</clr-dg-column>
+    <clr-dg-column>Lieferant</clr-dg-column>
+    <clr-dg-column style="width: 130px">Belegnr.</clr-dg-column>
+    <clr-dg-column>Kategorie</clr-dg-column>
+    <clr-dg-column style="width: 120px" class="dg-right">Netto</clr-dg-column>
+    <clr-dg-column style="width: 100px" class="dg-right">USt</clr-dg-column>
+    <clr-dg-column style="width: 120px" class="dg-right">Brutto</clr-dg-column>
+    <clr-dg-column style="width: 100px">Status</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of filtered">
+      <clr-dg-cell>{{ row.date | date:'dd.MM.yyyy' }}</clr-dg-cell>
+      <clr-dg-cell>
+        <a [routerLink]="['/expenses', row.id, 'edit']">{{ row.vendor || '—' }}</a>
+        <span *ngIf="row.archived" class="label" style="margin-left:.5rem;font-size:.7rem">Archiviert</span>
+      </clr-dg-cell>
+      <clr-dg-cell>{{ row.reference || '' }}</clr-dg-cell>
+      <clr-dg-cell>{{ row.category }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.netTotal | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.vatAmount | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.grossTotal | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell>
+        <span class="label" [class.label-success]="row.paymentStatus === 'bezahlt'" style="font-size:.7rem">
+          {{ row.paymentStatus === 'bezahlt' ? 'Bezahlt' : 'Offen' }}
+        </span>
+      </clr-dg-cell>
+    </clr-dg-row>
+  </clr-datagrid>
+</main>

@@ -1,0 +1,78 @@
+<p *ngIf="loading" class="m-muted">Lädt …</p>
+
+<ng-container *ngIf="!loading && type">
+
+  <div class="m-customer-head">
+    <h1 class="m-customer-name">{{ displayName }}</h1>
+    <div class="m-customer-meta">
+      {{ type === 'person' ? 'Person' : 'Firma' }}
+      <span *ngIf="customerNumber"> · K{{ customerNumber }}</span>
+      <span *ngIf="archived" class="m-badge m-badge-warning">Archiviert</span>
+    </div>
+  </div>
+
+  <div class="m-customer-actions">
+    <a class="m-pill m-pill-add" [routerLink]="['/m/customer', id, 'edit']">Bearbeiten</a>
+    <a class="m-pill" [href]="'/api/dsgvo/customer/' + id" target="_blank" rel="noopener">DSGVO-Auskunft</a>
+  </div>
+
+  <m-form-section title="Kontakt" *ngIf="email || phone || vatId">
+    <dl class="m-kv">
+      <ng-container *ngIf="email"><dt>E-Mail</dt><dd><a [href]="'mailto:' + email">{{ email }}</a></dd></ng-container>
+      <ng-container *ngIf="phone"><dt>Telefon</dt><dd><a [href]="'tel:' + phone">{{ phone }}</a></dd></ng-container>
+      <ng-container *ngIf="vatId"><dt>UID</dt><dd>{{ vatId }}</dd></ng-container>
+    </dl>
+  </m-form-section>
+
+  <m-form-section title="Adressen" *ngIf="addresses.length">
+    <div class="m-address" *ngFor="let a of addresses">
+      <div *ngIf="a.street">{{ a.street }}</div>
+      <div *ngIf="a.zip || a.city">{{ a.zip }} {{ a.city }}</div>
+      <div *ngIf="a.country">{{ a.country }}</div>
+    </div>
+  </m-form-section>
+
+  <m-form-section title="Rechnungen ({{ invoices.length }})">
+    <p *ngIf="!invoices.length" class="m-muted-small">Noch keine Rechnung.</p>
+    <m-card *ngFor="let inv of invoices" [link]="['/m/invoice', inv.id]">
+      <div card-head>
+        <span>{{ inv.number }} <span class="m-storno" *ngIf="inv.isStorno">Storno</span></span>
+        <span>{{ inv.gross | number:'1.2-2':'de-AT' }} €</span>
+      </div>
+      <div card-body>
+        <span>{{ inv.date | date:'dd.MM.yyyy' }}</span>
+      </div>
+      <div card-status>
+        <span *ngIf="!inv.finalized" class="m-badge">Entwurf</span>
+        <span *ngIf="inv.finalized && !inv.paid" class="m-badge m-badge-warning">Offen</span>
+        <span *ngIf="inv.paid" class="m-badge m-badge-success">Bezahlt</span>
+      </div>
+    </m-card>
+    <a routerLink="/m/invoice/new/edit" [queryParams]="{customerId: id}" class="m-pill m-pill-add">+ Neue Rechnung</a>
+  </m-form-section>
+
+  <m-form-section title="Projekte ({{ projects.length }})" *ngIf="modules.projects$ | async">
+    <p *ngIf="!projects.length" class="m-muted-small">Keine Projekte.</p>
+    <m-card *ngFor="let p of projects" [link]="['/m/project', p.id]">
+      <div card-head>
+        <span>{{ p.name }}</span>
+        <span>{{ p.openHours | number:'1.1-1':'de-AT' }} h offen</span>
+      </div>
+      <div card-status>
+        <span class="m-badge" [class.m-badge-success]="p.status === 'active'">{{ p.status === 'active' ? 'Aktiv' : 'Geschlossen' }}</span>
+      </div>
+    </m-card>
+    <a routerLink="/m/project/new/edit" [queryParams]="{customerId: id}" class="m-pill m-pill-add">+ Neues Projekt</a>
+  </m-form-section>
+
+  <m-form-section title="Gekaufte Produkte" *ngIf="(modules.products$ | async) && products.length">
+    <m-card *ngFor="let p of products">
+      <div card-head>
+        <span>{{ p.name }}</span>
+        <span>{{ p.count }}x</span>
+      </div>
+      <div card-body>Zuletzt: {{ p.lastDate | date:'dd.MM.yyyy' }}</div>
+    </m-card>
+  </m-form-section>
+
+</ng-container>

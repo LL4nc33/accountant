@@ -1,0 +1,43 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Wiederkehrende Rechnungen</h1>
+    <p>
+      Vorlage-Rechnung + Intervall = automatische Erzeugung im Hintergrund.
+      Die generierten Rechnungen sind Entwürfe — du reviewst und schreibst
+      sie selbst fest.
+    </p>
+  </div>
+  <div class="page-head-actions">
+    <a class="btn btn-primary" routerLink="/recurring/new/edit">+ Neuer Eintrag</a>
+  </div>
+</div>
+
+<main>
+
+  <app-empty-state
+    *ngIf="!loading && rows.length === 0"
+    icon="recycle"
+    title="Keine wiederkehrenden Rechnungen"
+    text="Wähle eine bestehende Rechnung als Vorlage und ein Intervall — alle 30 Tage (oder Quartal, Halbjahr, Jahr) wird automatisch eine Kopie als Entwurf erzeugt."
+    ctaLabel="+ Neuer Eintrag"
+    [ctaRouterLink]="['/recurring/new/edit']"
+  ></app-empty-state>
+
+  <clr-datagrid *ngIf="!loading && rows.length > 0">
+    <clr-dg-column>Bezeichnung</clr-dg-column>
+    <clr-dg-column>Intervall</clr-dg-column>
+    <clr-dg-column>Nächste Ausführung</clr-dg-column>
+    <clr-dg-column>Letzte Ausführung</clr-dg-column>
+    <clr-dg-column>Aktiv</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of rows">
+      <clr-dg-cell><a [routerLink]="['/recurring', row.id, 'edit']">{{ row.title }}</a></clr-dg-cell>
+      <clr-dg-cell>{{ row.interval }}</clr-dg-cell>
+      <clr-dg-cell>{{ row.nextRunDate | date:'dd.MM.yyyy' }}</clr-dg-cell>
+      <clr-dg-cell>{{ row.lastRunDate ? (row.lastRunDate | date:'dd.MM.yyyy') : '—' }}</clr-dg-cell>
+      <clr-dg-cell>
+        <span class="label" [class.label-success]="row.active" style="font-size:.7rem">{{ row.active ? 'Aktiv' : 'Pausiert' }}</span>
+      </clr-dg-cell>
+    </clr-dg-row>
+  </clr-datagrid>
+</main>

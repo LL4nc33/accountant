@@ -1,0 +1,18 @@
+<table class="table table-vertical">
+  <tbody>
+    <tr>
+      <th>
+        {{ 'address' | translate }} <br /><small>{{ address.addressType }}</small>
+      </th>
+      <td>
+        {{ entity.displayName }}
+        <button class="btn btn-link" title="{{ 'copyToClipboard' | translate }}" (click)="copy()">
+          <cds-icon shape="copy"></cds-icon>
+        </button>
+        <br *ngIf="address.street" />{{ address.street }}
+        <br *ngIf="address.zip || address.city" />{{ address.zip }}
+        {{ address.city }} <br *ngIf="address.country" />{{ countryName(address.country) }}
+      </td>
+    </tr>
+  </tbody>
+</table>

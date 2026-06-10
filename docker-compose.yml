@@ -1,0 +1,29 @@
+# accountant — minimal deployment (just the app).
+# The KI-Assistent and Paperless integration are optional and configured in the
+# UI (Firma → KI-Assistent / Paperless). For a fully pre-wired stack with a local
+# LLM (Ollama) and Paperless-ngx, use: docker compose -f docker-compose.full.yml up -d
+#
+#   1. cp .env.example .env   &&   edit SESSION_SECRET
+#   2. docker compose up -d
+#   3. open http://localhost:6002   (first login: admin / admin → change it!)
+
+services:
+  accountant:
+    build: .
+    # Or use a prebuilt image instead of building locally:
+    # image: ghcr.io/ll4nc33/accountant:latest
+    container_name: accountant
+    ports:
+      - "6002:6002"
+    volumes:
+      - accountant-data:/app/data
+    environment:
+      # Required in production so sessions survive restarts. Generate with:
+      #   openssl rand -hex 32
+      SESSION_SECRET: ${SESSION_SECRET:?Please set SESSION_SECRET in .env}
+      # Set to "true" when running behind an HTTPS reverse proxy.
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+    restart: unless-stopped
+
+volumes:
+  accountant-data:

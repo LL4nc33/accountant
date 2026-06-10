@@ -1,0 +1,73 @@
+<section class="m-dash" *ngIf="!loading">
+
+  <div class="m-dash-hero">
+    <div class="m-dash-eyebrow">Heute</div>
+    <h1 class="m-dash-date">{{ today | date:'EEEE, d. MMMM' }}</h1>
+    <p class="m-dash-greeting" *ngIf="userName">{{ greeting }}, {{ userName }}.</p>
+  </div>
+
+  <a class="m-dash-stat primary" routerLink="/m/invoices">
+    <div class="m-dash-label">Fakturiert · diesen Monat</div>
+    <div class="m-dash-value">{{ invoicedThisMonth | number:'1.2-2':'de-AT' }} €</div>
+    <div class="m-dash-meta">{{ invoiceCountThisMonth }} Rechnung{{ invoiceCountThisMonth === 1 ? '' : 'en' }}</div>
+  </a>
+
+  <a class="m-dash-stat" routerLink="/m/customers">
+    <div class="m-dash-label">Kunden</div>
+    <div class="m-dash-value">{{ customerCount }}</div>
+    <div class="m-dash-meta">in der Kartei</div>
+  </a>
+
+  <a class="m-dash-stat" routerLink="/m/invoices" *ngIf="outstandingCount > 0">
+    <div class="m-dash-label">Offene Forderungen</div>
+    <div class="m-dash-value">{{ outstandingTotal | number:'1.2-2':'de-AT' }} €</div>
+    <div class="m-dash-meta">
+      {{ outstandingCount }} offen<span *ngIf="overdueCount > 0"> · <span class="negative">{{ overdueCount }} überfällig</span></span>
+    </div>
+  </a>
+
+  <a class="m-dash-stat" routerLink="/m/expenses" *ngIf="(modules.expenses$ | async)">
+    <div class="m-dash-label">Ausgaben · diesen Monat</div>
+    <div class="m-dash-value">{{ expensesThisMonth | number:'1.2-2':'de-AT' }} €</div>
+    <div class="m-dash-meta">Saldo {{ saldoThisMonth | number:'1.2-2':'de-AT' }} €</div>
+  </a>
+
+  <a class="m-dash-stat" routerLink="/m/est" *ngIf="(modules.est$ | async) && estAnnual > 0">
+    <div class="m-dash-label">ESt-Vorschau · {{ today.getFullYear() }}</div>
+    <div class="m-dash-value">{{ estAnnual | number:'1.2-2':'de-AT' }} €</div>
+    <div class="m-dash-meta">
+      Grenzsatz {{ (estMarginalRate*100) | number:'1.0-0':'de-AT' }} %
+      <ng-container *ngIf="!estSvsCoupled"> · <span class="negative">ohne SVS-Abzug</span></ng-container>
+    </div>
+  </a>
+
+  <a class="m-dash-stat" routerLink="/m/svs" *ngIf="(modules.svs$ | async) && svsAnnualTotal > 0">
+    <div class="m-dash-label">SVS-Vorschau · {{ today.getFullYear() }}</div>
+    <div class="m-dash-value">{{ svsAnnualTotal | number:'1.2-2':'de-AT' }} €</div>
+    <div class="m-dash-meta">
+      <ng-container *ngIf="svsIsVorlaeufig">vorläufig — Mindest-BGL</ng-container>
+      <ng-container *ngIf="!svsIsVorlaeufig && svsRueckstellung > 0">+ ~{{ svsRueckstellung | number:'1.0-0':'de-AT' }} € Rückstellung</ng-container>
+      <ng-container *ngIf="!svsIsVorlaeufig && svsRueckstellung <= 0">monatlich ~{{ (svsAnnualTotal/12) | number:'1.0-0':'de-AT' }} €</ng-container>
+    </div>
+  </a>
+
+  <h2 class="m-dash-h">Letzte Rechnungen</h2>
+  <p class="m-dash-muted" *ngIf="!recent.length">
+    Noch keine Rechnung geschrieben. <a routerLink="/m/invoice/new/edit">Die erste anlegen →</a>
+  </p>
+  <a class="m-dash-recent" *ngFor="let inv of recent" [routerLink]="['/m/invoice', inv.id]">
+    <div class="m-dash-recent-head">
+      <span class="m-dash-recent-num">{{ inv.number }}</span>
+      <span class="m-dash-recent-amount">{{ inv.gross | number:'1.2-2':'de-AT' }} €</span>
+    </div>
+    <div class="m-dash-recent-meta">
+      {{ inv.date | date:'dd.MM.yyyy' }}
+      <span class="m-badge" *ngIf="!inv.finalized">Entwurf</span>
+      <span class="m-badge m-badge-warning" *ngIf="inv.finalized && !inv.paid">Offen</span>
+      <span class="m-badge m-badge-success" *ngIf="inv.paid">Bezahlt</span>
+    </div>
+  </a>
+
+</section>
+
+<p class="m-dash-loading" *ngIf="loading">Lade …</p>

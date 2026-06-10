@@ -1,0 +1,345 @@
+<ng-container *ngIf="entity">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>
+        {{ "invoice" | translate }} {{ entity.displayName }}
+        <span *ngIf="!entity.finalized && !entity.archived" class="label">Entwurf</span>
+        <span *ngIf="entity.finalized" class="label label-info">Festgeschrieben</span>
+        <span *ngIf="entity.finalized && !entity.paid && !entity.archived" class="label label-warning">Offen</span>
+        <span *ngIf="entity.paid" class="label label-success">Bezahlt</span>
+        <span *ngIf="entity.archived" class="label">Archiviert</span>
+      </h1>
+      <p *ngIf="customerLink">
+        <a [routerLink]="customerLink" class="customer-chip" title="Zum Kunden">
+          <cds-icon shape="user"></cds-icon> {{ customerName }}
+        </a>
+      </p>
+    </div>
+
+    <div class="page-head-actions">
+      <button
+        type="button"
+        class="btn btn-icon btn-outline"
+        aria-label="overview"
+        [routerLink]="['/om/invoice']"
+      >
+        {{ "overview" | translate }}
+        <cds-icon shape="view-list"></cds-icon>
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon btn-danger"
+        aria-label="delete-invoice"
+        *ngIf="!entity.finalized"
+        (click)="confirmDelete()"
+      >
+        {{ "deleteInvoice" | translate }}
+        <cds-icon shape="trash"></cds-icon>
+      </button>
+      <a
+        [routerLink]="['./edit']"
+        type="button"
+        class="btn btn-icon btn-primary"
+        aria-label="edit-invoice"
+        *ngIf="!entity.finalized"
+      >
+        {{ "editInvoice" | translate }}
+        <cds-icon shape="pencil"></cds-icon>
+      </a>
+      <button
+        *ngIf="!entity.finalized"
+        type="button"
+        class="btn btn-icon btn-success"
+        aria-label="finalize-invoice"
+        (click)="confirmFinalize()"
+      >
+        Festschreiben
+        <cds-icon shape="lock"></cds-icon>
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon btn-outline"
+        aria-label="archive-invoice"
+        (click)="toggleArchive()"
+      >
+        <cds-icon [attr.shape]="entity.archived ? 'undo' : 'archive'"></cds-icon>
+        {{ entity.archived ? 'Reaktivieren' : 'Archivieren' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon btn-primary"
+        aria-label="email-invoice"
+        *ngIf="smtpConfigured"
+        (click)="openMailModal()"
+      >
+        <cds-icon shape="envelope"></cds-icon>
+        Per E-Mail senden
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon btn-info"
+        aria-label="mark-paid"
+        *ngIf="entity.finalized && !entity.paid && !entity.correctsInvoiceId"
+        (click)="openPaidModal()"
+      >
+        <cds-icon shape="check"></cds-icon>
+        Bezahlt markieren
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon btn-outline"
+        aria-label="mark-unpaid"
+        *ngIf="entity.paid"
+        (click)="markUnpaid()"
+      >
+        <cds-icon shape="undo"></cds-icon>
+        Als unbezahlt markieren
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon btn-warning"
+        aria-label="storno-invoice"
+        *ngIf="entity.finalized && !entity.correctsInvoiceId"
+        (click)="confirmStorno()"
+      >
+        <cds-icon shape="rewind"></cds-icon>
+        Storno anlegen
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon btn-outline"
+        aria-label="duplicate-invoice"
+        (click)="duplicate()"
+        [disabled]="duplicating"
+      >
+        <cds-icon shape="copy"></cds-icon>
+        {{ duplicating ? 'Kopiert…' : 'Als Vorlage kopieren' }}
+      </button>
+      <a
+        type="button"
+        class="btn btn-icon btn-outline"
+        [href]="'/api/invoice/pdf?id=' + entity.id"
+        [download]="'Rechnung-' + entity.invoiceNumber + '.pdf'"
+        target="_blank"
+        title="Rechnungs-PDF herunterladen"
+      >
+        <cds-icon shape="download"></cds-icon>
+        PDF herunterladen
+      </a>
+      <a
+        type="button"
+        class="btn btn-icon btn-outline"
+        [href]="'/api/invoice/' + entity.id + '/xrechnung.xml'"
+        target="_blank"
+        title="UBL 2.1 XML für DE-B2B-Pflicht 2025 und AT-B2G (USP)"
+      >
+        <cds-icon shape="file-zip"></cds-icon>
+        XRechnung-XML
+      </a>
+    </div>
+  </div>
+
+  <!-- Storno-Bestätigungs-Modal -->
+  <clr-modal [(clrModalOpen)]="showConfirmStornoModal">
+    <h3 class="modal-title">Storno-Rechnung anlegen?</h3>
+    <div class="modal-body">
+      <p>
+        Es wird eine neue Rechnung angelegt mit <strong>umgekehrten Beträgen</strong>
+        und Verweis auf die Original-Rechnung.
+      </p>
+      <p>
+        Die neue Storno-Rechnung ist zunächst <strong>Entwurf</strong> —
+        du kannst die Daten noch anpassen, bevor du sie festschreibst.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="showConfirmStornoModal = false">Abbrechen</button>
+      <button type="button" class="btn btn-warning" (click)="createStorno()" [disabled]="stornoing">
+        {{ stornoing ? 'Erzeugt…' : 'Storno-Rechnung erzeugen' }}
+      </button>
+    </div>
+  </clr-modal>
+
+  <!-- E-Mail-Versand-Modal -->
+  <clr-modal [(clrModalOpen)]="showMailModal">
+    <h3 class="modal-title">Rechnung per E-Mail senden</h3>
+    <div class="modal-body">
+      <form clrForm clrLayout="horizontal">
+        <clr-input-container>
+          <label>Empfänger</label>
+          <input clrInput type="email" name="mailTo" [(ngModel)]="mailTo" required />
+        </clr-input-container>
+        <clr-input-container>
+          <label>Betreff</label>
+          <input clrInput name="mailSubject" [(ngModel)]="mailSubject" placeholder="Default: Rechnung {{ entity.invoiceNumber }}" />
+        </clr-input-container>
+        <clr-textarea-container>
+          <label>Nachricht</label>
+          <textarea clrTextarea name="mailBody" [(ngModel)]="mailBody" rows="6" placeholder="Default: Standard-Anschreiben mit PDF-Verweis"></textarea>
+          <clr-control-helper>Die Rechnungs-PDF wird automatisch als Anhang hinzugefügt.</clr-control-helper>
+        </clr-textarea-container>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="showMailModal = false">Abbrechen</button>
+      <button type="button" class="btn btn-primary" (click)="sendMail()" [disabled]="sending || !mailTo">
+        {{ sending ? 'Sendet…' : 'Senden' }}
+      </button>
+    </div>
+  </clr-modal>
+
+  <!-- Bezahlt-Markieren-Modal -->
+  <clr-modal [(clrModalOpen)]="showPaidModal">
+    <h3 class="modal-title">Rechnung als bezahlt markieren?</h3>
+    <div class="modal-body">
+      <p>Datum der Zahlung — Default ist heute.</p>
+      <form clrForm clrLayout="horizontal">
+        <clr-date-container>
+          <label>Bezahlt am</label>
+          <input clrDate name="paidAtPicker" [(ngModel)]="paidAtPicker" />
+        </clr-date-container>
+      </form>
+      <p class="muted" style="margin-top: 0.5rem; font-size: 0.85rem;">
+        Die Rechnung bleibt festgeschrieben; nur Status + Datum werden gesetzt.
+        Eintrag landet im Audit-Log.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="showPaidModal = false">Abbrechen</button>
+      <button type="button" class="btn btn-info" (click)="markPaid()" [disabled]="markingPaid">
+        {{ markingPaid ? 'Speichert…' : 'Bezahlt markieren' }}
+      </button>
+    </div>
+  </clr-modal>
+
+  <!-- Festschreibungs-Bestätigungs-Modal -->
+  <clr-modal [(clrModalOpen)]="showConfirmFinalizeModal">
+    <h3 class="modal-title">Rechnung festschreiben?</h3>
+    <div class="modal-body">
+      <p>
+        Mit dem Festschreiben wird diese Rechnung <strong>unveränderlich</strong>.
+        Das ist gesetzlich vorgeschrieben (§131 BAO — Unveränderbarkeit von
+        Aufzeichnungen) und kann nicht rückgängig gemacht werden.
+      </p>
+      <p>
+        Korrekturen können danach nur noch über eine <strong>Storno-Rechnung</strong>
+        oder <strong>Korrektur-Rechnung</strong> erfolgen.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="showConfirmFinalizeModal = false">
+        Abbrechen
+      </button>
+      <button type="button" class="btn btn-success" (click)="finalize()" [disabled]="finalizing">
+        {{ finalizing ? 'Festschreibt…' : 'Endgültig festschreiben' }}
+      </button>
+    </div>
+  </clr-modal>
+
+  <!-- Skonto-Übersicht: nur wenn skontoPercent gesetzt + Rechnungsdatum vorhanden -->
+  <section class="skonto-section" *ngIf="entity.skontoPercent && entity.skontoPercent > 0 && entity.invoiceDate">
+    <div class="skonto-card">
+      <div class="skonto-head">
+        <strong>Skonto:</strong>
+        {{ entity.skontoPercent | number:'1.0-2':'de-AT' }} %
+        bei Zahlung bis {{ entity.skontoDeadline | date:'dd.MM.yyyy' }}
+        ({{ entity.skontoDays }} Tage)
+      </div>
+      <div class="skonto-meta">
+        Skonto-Betrag: −{{ entity.skontoAmount | currency:'EUR':'symbol':'1.2-2':'de-AT' }} ·
+        zu zahlen: <strong>{{ entity.grossTotalWithSkonto | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mahnstand-Sektion — nur wenn Modul aktiv UND (überfällig ODER Mahnungen vorhanden) -->
+  <section class="reminder-section"
+           *ngIf="(modules.reminder$ | async) && (daysOverdue > 0 || reminders.length > 0)">
+    <h2>Mahnstand</h2>
+    <div class="reminder-status">
+      <span class="overdue-tag" *ngIf="daysOverdue > 0">
+        <cds-icon shape="warning-standard"></cds-icon>
+        Überfällig seit <strong>{{ daysOverdue }} Tagen</strong>
+      </span>
+    </div>
+
+    <table class="reminder-table" *ngIf="reminders.length > 0">
+      <thead>
+        <tr>
+          <th>Datum</th>
+          <th>Stufe</th>
+          <th>Mahn-Nr.</th>
+          <th>Frist bis</th>
+          <th class="right">Gesamtforderung</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of reminders">
+          <td>{{ r.reminderDate | date:'dd.MM.yyyy' }}</td>
+          <td>{{ stageLabel(r.stage) }}</td>
+          <td class="mono">{{ r.reminderNumber }}</td>
+          <td>{{ r.dueDate | date:'dd.MM.yyyy' }}</td>
+          <td class="right">{{ r.totalDue | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</td>
+          <td>
+            <span *ngIf="r.sent" class="label label-success" style="font-size:.7rem">Versendet</span>
+            <span *ngIf="!r.sent" class="label" style="font-size:.7rem">Entwurf</span>
+          </td>
+          <td>
+            <button class="btn btn-link btn-sm" (click)="openReminderPdf(r.id)">PDF</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="reminder-actions" *ngIf="nextReminderStage !== null && entity.finalized && !entity.paid">
+      <button class="btn btn-warning" type="button" (click)="createReminder(nextReminderStage)" [disabled]="reminderCreating">
+        + Neue Mahnung ({{ stageLabel(nextReminderStage) }})
+      </button>
+    </div>
+    <p class="hint" *ngIf="nextReminderStage === null && reminders.length > 0">
+      Alle drei Mahnstufen wurden bereits angelegt. Wenn weiterhin keine Zahlung erfolgt, übergib die Forderung an ein Inkasso-Unternehmen.
+    </p>
+  </section>
+
+  <main>
+    <pdf-viewer
+      [src]="'/api/invoice/pdf?id=' + entity.id"
+      [autoresize]="false"
+      [fit-to-page]="true"
+      style="height: 1200px"
+    ></pdf-viewer>
+  </main>
+
+  <clr-modal
+    [(clrModalOpen)]="showConfirmDeleteModal"
+    [clrModalStaticBackdrop]="false"
+  >
+    <h3 class="modal-title">Rechnung löschen?</h3>
+    <div class="modal-body">
+      <p>
+        {{
+          "confirmDeleteInvoice"
+            | translate : { displayName: entity.displayName }
+        }}
+      </p>
+      <p class="hint">
+        Nur Entwürfe können gelöscht werden. Festgeschriebene Rechnungen
+        (§131 BAO) bleiben unveränderlich erhalten — Korrektur nur via Storno.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="showConfirmDeleteModal = false"
+      >
+        Abbrechen
+      </button>
+      <button type="button" class="btn btn-danger" (click)="delete()">
+        Endgültig löschen
+      </button>
+    </div>
+  </clr-modal>
+</ng-container>

@@ -1,0 +1,43 @@
+.hint {
+  color: var(--clr-color-neutral-700, #666);
+  margin-bottom: 1.5rem;
+  max-width: 720px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.92rem;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  select {
+    padding: 4px 8px;
+    border: 1px solid var(--clr-color-neutral-400, #CCC);
+    border-radius: 2px;
+    background: white;
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  .muted {
+    margin-left: auto;
+    color: var(--clr-color-neutral-600, #666);
+  }
+}
+
+:host ::ng-deep .dg-right,
+:host ::ng-deep clr-dg-cell.dg-right,
+:host ::ng-deep clr-dg-column.dg-right .datagrid-column-title {
+  text-align: right;
+  justify-content: flex-end;
+}
+
+:host ::ng-deep clr-dg-row { cursor: pointer; }

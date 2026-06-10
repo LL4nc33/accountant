@@ -1,0 +1,110 @@
+<ng-container *ngIf="field">
+<clr-checkbox-container *ngIf="field.inputType === 'checkbox'">
+  <label *ngIf="showLabel">{{ label || field.caption }}</label>
+  <clr-checkbox-wrapper>
+    <input
+      type="checkbox"
+      clrCheckbox
+      (blur)="onBlur($event)"
+      [(ngModel)]="entity[field.key]"
+      [name]="field.key"
+      [ngStyle]="{ width: width }"
+      [placeholder]="placeholder"
+    />
+  </clr-checkbox-wrapper>
+  <clr-control-error>{{ form.form.get(field.key)?.errors }}</clr-control-error>
+  <clr-control-helper
+    *ngIf="helperText"
+    [innerHTML]="helperText"
+  ></clr-control-helper>
+</clr-checkbox-container>
+
+<clr-input-container *ngIf="field.inputType === undefined">
+  <label *ngIf="showLabel">{{ label || field.caption }}</label>
+  <input
+    clrInput
+    type="text"
+    (blur)="onBlur($event)"
+    [(ngModel)]="entity[field.key]"
+    [name]="field.key"
+    [attr.name]="field.key"
+    [ngStyle]="{ width: width }"
+    [placeholder]="placeholder"
+  />
+  <clr-control-error>{{ form.form.get(field.key)?.errors }}</clr-control-error>
+  <clr-control-helper
+    *ngIf="helperText"
+    [innerHTML]="helperText"
+  ></clr-control-helper>
+</clr-input-container>
+
+<clr-textarea-container *ngIf="field.inputType === 'multiline'">
+  <label *ngIf="showLabel">{{ label || field.caption }}</label>
+  <textarea
+    clrTextarea
+    type="text"
+    (blur)="onBlur($event)"
+    [(ngModel)]="entity[field.key]"
+    [name]="field.key"
+    [attr.name]="field.key"
+    [attr.rows]="rows"
+    [ngStyle]="{ width: width }"
+    [placeholder]="placeholder"
+  ></textarea>
+  <clr-control-error>{{ form.form.get(field.key)?.errors }}</clr-control-error>
+  <clr-control-helper
+    *ngIf="helperText"
+    [innerHTML]="helperText"
+  ></clr-control-helper>
+</clr-textarea-container>
+
+<clr-number-input-container *ngIf="field.inputType === 'number'">
+  <label *ngIf="showLabel">{{ label || field.caption }}</label>
+  <input
+    clrNumberInput
+    type="number"
+    (blur)="onBlur($event)"
+    [(ngModel)]="entity[field.key]"
+    [name]="field.key"
+    [attr.name]="field.key"
+    [ngStyle]="{ width: width }"
+    [placeholder]="placeholder"
+  />
+  <clr-control-error>{{ form.form.get(field.key)?.errors }}</clr-control-error>
+  <clr-control-helper
+    *ngIf="helperText"
+    [innerHTML]="helperText"
+  ></clr-control-helper>
+</clr-number-input-container>
+
+<clr-select-container *ngIf="field.inputType === 'select-literal'">
+  <label *ngIf="showLabel">{{ label || field.caption }}</label>
+  <select
+    clrSelect
+    [name]="field.key"
+    (blur)="onBlur($event)"
+    [(ngModel)]="entity[field.key]"
+    [ngStyle]="{ width: width }"
+  >
+    <option *ngIf="field.options.allowNull" [ngValue]="null"></option>
+    <option *ngFor="let value of getOptionValues(field.key)" [ngValue]="value">
+      {{ value }}
+    </option>
+  </select>
+  <clr-control-error>{{ form.form.get(field.key)?.errors }}</clr-control-error>
+  <clr-control-helper *ngIf="helperText">{{ helperText }}</clr-control-helper>
+</clr-select-container>
+
+<clr-date-container *ngIf="field.inputType === 'date'">
+  <label *ngIf="showLabel">{{ label || field.caption }}</label>
+  <input
+    type="date"
+    autocomplete="off"
+    clrDate
+    [(clrDate)]="entity[field.key]"
+    [ngStyle]="{ width: width }"
+    [name]="field.key"
+    (blur)="onBlur($event)"
+  />
+</clr-date-container>
+</ng-container>

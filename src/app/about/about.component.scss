@@ -1,0 +1,110 @@
+.about-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 4rem;
+}
+
+// Hero spiegelt den Login: Eyebrow + Brandline (Georgia Italic) + Subtitle,
+// rechts dezent die Geometrie-Anlehnung aus dem Login-Pattern
+.about-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: end;
+  padding: 1rem 0 2rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid #E8E8E8;
+  overflow: hidden;
+}
+
+.about-eyebrow {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #999999;
+  margin-bottom: 0.6rem;
+}
+
+.about-brandline {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  line-height: 1.05;
+  color: #1A1A1A !important;
+  margin: 0 0 0.6rem;
+  letter-spacing: -0.01em;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+.about-subtitle {
+  font-family: Georgia, serif;
+  font-size: 1.05rem;
+  color: #4A4A4A !important;
+  margin: 0;
+  font-style: normal;
+}
+
+// Geometrie-Echo — gleicher Aufbau wie Dashboard-Hero
+.about-hero-geo {
+  position: relative;
+  width: 180px;
+  height: 130px;
+  flex-shrink: 0;
+
+  .g {
+    position: absolute;
+    border-radius: 2px;
+    transform: rotate(45deg);
+    transform-origin: center;
+  }
+  .g1 { top:  -10px; right:  10px; width: 80px;  height: 80px;  background: rgba(99, 161, 167, 0.32); }
+  .g2 { top:   25px; right: -10px; width: 100px; height: 100px; background: rgba(155, 196, 200, 0.40); }
+  .g3 { top:    5px; right:  70px; width: 60px;  height: 60px;  background: rgba(208, 228, 230, 0.50); }
+  .g4 { top:   55px; right:  55px; width: 45px;  height: 45px;  background: rgba(75,  130, 137, 0.28); }
+}
+
+@media (max-width: 640px) {
+  .about-hero-geo { display: none; }
+  .about-hero { grid-template-columns: 1fr; }
+}
+
+// Meta-Liste — kompakter Buchsteckbrief
+.about-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 1.5rem;
+  row-gap: 0.5rem;
+  margin: 0 0 2rem;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.92rem;
+
+  dt {
+    color: #999999;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.74rem;
+    align-self: center;
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+    color: #1A1A1A;
+
+    a {
+      color: #2F2F2F;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: #CCCCCC;
+    }
+    a:hover {
+      text-decoration-color: #2F2F2F;
+    }
+  }
+}

@@ -1,0 +1,104 @@
+<main class="zm">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>Zusammenfassende Meldung</h1>
+      <p>
+        Innergemeinschaftliche Dienstleistungen mit Reverse-Charge (§3a Abs. 6 UStG / Art. 196 MwStSyst-RL),
+        gruppiert pro Empfänger-UID. Pflichtige Meldung an FinanzOnline.
+      </p>
+    </div>
+    <div class="page-head-actions">
+      <button class="btn btn-primary" (click)="downloadCsv()" [disabled]="!result || !result.entries.length">CSV herunterladen</button>
+    </div>
+  </div>
+
+  <section class="period-bar">
+    <label>
+      <input type="radio" name="mode" value="month" [(ngModel)]="mode" (ngModelChange)="load()" /> Monat
+    </label>
+    <label>
+      <input type="radio" name="mode" value="quarter" [(ngModel)]="mode" (ngModelChange)="load()" /> Quartal
+    </label>
+    <label>
+      <input type="radio" name="mode" value="year" [(ngModel)]="mode" (ngModelChange)="load()" /> Jahr
+    </label>
+
+    <select [(ngModel)]="year" (ngModelChange)="load()" class="period-select">
+      <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+    </select>
+
+    <select *ngIf="mode === 'month'" [(ngModel)]="month" (ngModelChange)="load()" class="period-select">
+      <option *ngFor="let m of months" [ngValue]="m.v">{{ m.l }}</option>
+    </select>
+
+    <select *ngIf="mode === 'quarter'" [(ngModel)]="quarter" (ngModelChange)="load()" class="period-select">
+      <option *ngFor="let q of quarters" [ngValue]="q">Q{{ q }}</option>
+    </select>
+  </section>
+
+  <div *ngIf="loading" class="loading-state">Lade ZM-Daten…</div>
+  <div *ngIf="error" class="error-box">{{ error }}</div>
+
+  <ng-container *ngIf="result && !loading">
+    <p class="summary-line">
+      <strong>{{ result.entries.length }}</strong> Empfänger ·
+      <strong>{{ result.invoiceCount }}</strong> Rechnungen ·
+      Summe <strong>{{ fmt(result.totalSum) }} €</strong>
+    </p>
+
+    <clr-alert clrAlertType="warning" [clrAlertClosable]="false" *ngIf="result.skippedMissingVatId.length">
+      <clr-alert-item>
+        <span class="alert-text">
+          <strong>{{ result.skippedMissingVatId.length }} RC-Rechnung(en) ohne UID</strong>
+          — vor ZM-Meldung UID am Kunden bzw. an der Rechnung nachtragen:
+          <ul>
+            <li *ngFor="let s of result.skippedMissingVatId">{{ s.invoiceNumber }} — {{ s.reason }}</li>
+          </ul>
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+
+    <clr-alert clrAlertType="info" [clrAlertClosable]="false" *ngIf="result.drittlandCount > 0">
+      <clr-alert-item>
+        <span class="alert-text">
+          {{ result.drittlandCount }} RC-Rechnung(en) an Drittland-Empfänger — nicht ZM-pflichtig, daher hier nicht aufgeführt.
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+
+    <table class="zm-table" *ngIf="result.entries.length; else noEntries">
+      <thead>
+        <tr>
+          <th>UID</th>
+          <th>Land</th>
+          <th class="right">Anzahl Rg.</th>
+          <th class="right">Summe netto (EUR)</th>
+          <th>Rechnungs-Nummern</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of result.entries">
+          <td class="mono">{{ e.recipientVatId }}</td>
+          <td>{{ e.country }}</td>
+          <td class="right">{{ e.invoiceCount }}</td>
+          <td class="right">{{ fmt(e.sumNet) }}</td>
+          <td class="muted small">{{ e.invoiceNumbers.join(', ') }}</td>
+        </tr>
+        <tr class="total">
+          <td colspan="3">Gesamt</td>
+          <td class="right">{{ fmt(result.totalSum) }}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noEntries>
+      <p class="muted">Keine ZM-pflichtigen Rechnungen im Zeitraum <strong>{{ periodLabel() }}</strong>.</p>
+    </ng-template>
+
+    <p class="muted footer-hint">
+      ZM-Meldung erfolgt bei FinanzOnline. Frist: Monatsmeldung bis Letzter des Folgemonats,
+      Quartalsmeldung bis Letzter des dem Quartal folgenden Monats. Dreiecksgeschäfte sind hier
+      nicht abgebildet — bei diesen muss die ZM-Spalte manuell ergänzt werden.
+    </p>
+  </ng-container>
+</main>

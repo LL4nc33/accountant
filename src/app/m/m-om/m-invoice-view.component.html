@@ -1,0 +1,115 @@
+<p *ngIf="loading" class="m-muted">Lädt …</p>
+
+<ng-container *ngIf="!loading && entity">
+
+  <div class="m-inv-head">
+    <h1>{{ entity.invoiceNumber }}</h1>
+    <div class="m-inv-meta">
+      <a *ngIf="customerId" [routerLink]="['/m/customer', customerId]" class="m-inv-customer">{{ customerName }}</a>
+      <span class="m-inv-subject" *ngIf="entity.subject">{{ entity.subject }}</span>
+    </div>
+    <div class="m-inv-badges">
+      <span *ngIf="!entity.finalized" class="m-badge">Entwurf</span>
+      <span *ngIf="entity.finalized" class="m-badge m-badge-info">Festgeschrieben</span>
+      <span *ngIf="entity.finalized && !entity.paid" class="m-badge m-badge-warning">Offen</span>
+      <span *ngIf="entity.paid" class="m-badge m-badge-success">Bezahlt</span>
+      <span *ngIf="entity.archived" class="m-badge m-badge-warning">Archiviert</span>
+      <span *ngIf="entity.correctsInvoiceId" class="m-badge m-badge-danger">Storno</span>
+    </div>
+  </div>
+
+  <div class="m-inv-actions">
+    <a *ngIf="!entity.finalized" [routerLink]="['/m/invoice', id, 'edit']" class="m-pill m-pill-primary">Bearbeiten</a>
+    <button *ngIf="!entity.finalized" class="m-pill" (click)="openFinalizeModal()">Festschreiben</button>
+    <button *ngIf="entity.finalized && !entity.paid && !entity.correctsInvoiceId" class="m-pill m-pill-info" (click)="openPaidModal()">Bezahlt markieren</button>
+    <button *ngIf="entity.paid" class="m-pill" (click)="markUnpaid()">Als unbezahlt markieren</button>
+    <button *ngIf="entity.finalized && !entity.correctsInvoiceId" class="m-pill m-pill-warning" (click)="openStornoModal()">Storno anlegen</button>
+    <button class="m-pill" (click)="duplicate()" [disabled]="duplicating">{{ duplicating ? 'Kopiert…' : 'Als Vorlage kopieren' }}</button>
+    <button class="m-pill" (click)="toggleArchive()" [disabled]="archiving">{{ entity.archived ? 'Reaktivieren' : 'Archivieren' }}</button>
+  </div>
+
+  <!-- Mahnstand-Sektion — nur wenn Modul aktiv UND überfällig ODER Mahnungen vorhanden -->
+  <m-form-section *ngIf="(modules.reminder$ | async) && (daysOverdue > 0 || reminders.length > 0)"
+                  title="Mahnstand">
+    <p *ngIf="daysOverdue > 0" class="m-overdue-tag">Überfällig seit <strong>{{ daysOverdue }} Tagen</strong></p>
+    <ul class="m-reminder-list" *ngIf="reminders.length > 0">
+      <li *ngFor="let r of reminders">
+        <div class="m-reminder-head">
+          <span>{{ stageLabel(r.stage) }} · {{ r.reminderNumber }}</span>
+          <span>{{ r.totalDue | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</span>
+        </div>
+        <div class="m-reminder-meta">
+          {{ r.reminderDate | date:'dd.MM.yyyy' }} · Frist: {{ r.dueDate | date:'dd.MM.yyyy' }}
+          <span class="m-badge" [class.m-badge-success]="r.sent" style="margin-left:.4rem">{{ r.sent ? 'Versendet' : 'Entwurf' }}</span>
+        </div>
+        <a class="m-pill" (click)="openReminderPdf(r.id)">PDF öffnen</a>
+      </li>
+    </ul>
+    <button *ngIf="nextReminderStage !== null && entity.finalized && !entity.paid"
+            class="m-pill m-pill-warning"
+            (click)="createReminder(nextReminderStage)"
+            [disabled]="reminderCreating">
+      + Neue Mahnung ({{ stageLabel(nextReminderStage) }})
+    </button>
+  </m-form-section>
+
+  <m-form-section title="Rechnungs-PDF">
+    <m-pdf-viewer [url]="pdfUrl" [title]="'Rechnung ' + entity.invoiceNumber"></m-pdf-viewer>
+    <a class="m-pill" [href]="pdfUrl" [download]="'Rechnung-' + entity.invoiceNumber + '.pdf'" target="_blank">
+      ↓ PDF herunterladen
+    </a>
+  </m-form-section>
+
+  <m-form-section title="Stammdaten">
+    <dl class="m-kv">
+      <dt>Datum</dt><dd>{{ entity.invoiceDate | date:'dd.MM.yyyy' }}</dd>
+      <dt>Betrag</dt><dd>{{ entity.grossTotal | number:'1.2-2':'de-AT' }} €</dd>
+      <ng-container *ngIf="entity.recipientVatId"><dt>Empfänger-UID</dt><dd>{{ entity.recipientVatId }}</dd></ng-container>
+      <ng-container *ngIf="entity.reverseCharge"><dt>Reverse-Charge</dt><dd>ja</dd></ng-container>
+      <ng-container *ngIf="entity.finalizedAt"><dt>Festgeschrieben</dt><dd>{{ entity.finalizedAt | date:'dd.MM.yyyy HH:mm' }}</dd></ng-container>
+      <ng-container *ngIf="entity.paidAt"><dt>Bezahlt</dt><dd>{{ entity.paidAt | date:'dd.MM.yyyy' }}</dd></ng-container>
+    </dl>
+  </m-form-section>
+
+  <!-- Modals -->
+  <m-form-modal [(open)]="showPaidModal" title="Bezahlt markieren">
+    <p>Datum der Zahlung — Default ist heute.</p>
+    <label class="m-modal-field">
+      <span>Bezahlt am</span>
+      <input type="date" [(ngModel)]="paidAtPicker" />
+    </label>
+    <p class="m-modal-hint">Festschreibung bleibt bestehen — nur Status + Datum werden gesetzt. Eintrag landet im Audit-Log.</p>
+    <div modal-foot>
+      <button class="m-pill" (click)="showPaidModal = false">Abbrechen</button>
+      <button class="m-pill m-pill-info" (click)="markPaid()" [disabled]="markingPaid">
+        {{ markingPaid ? 'Speichert…' : 'Bezahlt markieren' }}
+      </button>
+    </div>
+  </m-form-modal>
+
+  <m-form-modal [(open)]="showFinalizeModal" title="Rechnung festschreiben?">
+    <p>Mit dem Festschreiben wird diese Rechnung <strong>unveränderlich</strong>.
+      Das ist §131 BAO und kann nicht rückgängig gemacht werden.</p>
+    <p class="m-modal-hint">Korrekturen können danach nur noch über eine Storno-Rechnung erfolgen.</p>
+    <div modal-foot>
+      <button class="m-pill" (click)="showFinalizeModal = false">Abbrechen</button>
+      <button class="m-pill m-pill-primary" (click)="finalize()" [disabled]="finalizing">
+        {{ finalizing ? 'Schreibt fest…' : 'Endgültig festschreiben' }}
+      </button>
+    </div>
+  </m-form-modal>
+
+  <m-form-modal [(open)]="showStornoModal" title="Storno-Rechnung anlegen?">
+    <p>Es wird eine neue Rechnung angelegt mit <strong>umgekehrten Beträgen</strong>
+       und Verweis auf das Original.</p>
+    <p class="m-modal-hint">Die neue Storno-Rechnung ist zunächst Entwurf — du kannst sie
+       noch anpassen bevor du sie festschreibst.</p>
+    <div modal-foot>
+      <button class="m-pill" (click)="showStornoModal = false">Abbrechen</button>
+      <button class="m-pill m-pill-warning" (click)="createStorno()" [disabled]="stornoing">
+        {{ stornoing ? 'Erzeugt…' : 'Storno erzeugen' }}
+      </button>
+    </div>
+  </m-form-modal>
+
+</ng-container>

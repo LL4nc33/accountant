@@ -1,0 +1,147 @@
+<div class="onboarding" *ngIf="settings">
+
+  <!-- <div> statt <header>: Clarity hat globales Styling auf <header> das die Sektion
+       horizontal flext und unser Stacked-Layout zerlegt. -->
+  <div class="onb-hero">
+    <div class="onb-eyebrow">Setup · Schritt {{ step }} von 3</div>
+    <h1>Willkommen bei accountant</h1>
+    <p class="onb-lead">Drei kurze Schritte zu einem rechtssicheren Rechnungs-PDF. Du kannst alles
+      später noch unter <em>Einstellungen → Firma</em> anpassen.</p>
+
+    <ul class="onb-stepbar">
+      <li [class.active]="step === 1" [class.done]="step > 1">Firma</li>
+      <li [class.active]="step === 2" [class.done]="step > 2">Steuer</li>
+      <li [class.active]="step === 3">Bank &amp; Kontakt</li>
+    </ul>
+  </div>
+
+  <form clrForm clrLayout="horizontal" class="onb-form">
+
+    <!-- ─────────── Schritt 1 — Firma ─────────── -->
+    <section *ngIf="step === 1" class="onb-step">
+      <h2>Wer rechnet ab?</h2>
+      <p class="hint">Diese Daten erscheinen oben links auf jeder Rechnung.</p>
+
+      <clr-input-container>
+        <label>Firmenname *</label>
+        <input clrInput name="name" [(ngModel)]="settings.name" required />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Rechtsform / Zusatz</label>
+        <input clrInput name="nameAddon" [(ngModel)]="settings.nameAddon" placeholder="e.U., GmbH, …" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Straße *</label>
+        <input clrInput name="addressStreet" [(ngModel)]="settings.addressStreet" required />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>PLZ *</label>
+        <input clrInput name="addressZip" [(ngModel)]="settings.addressZip" required />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Stadt *</label>
+        <input clrInput name="addressCity" [(ngModel)]="settings.addressCity" required />
+      </clr-input-container>
+
+      <clr-select-container>
+        <label>Land *</label>
+        <select clrSelect name="country" [(ngModel)]="settings.country">
+          <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+        </select>
+        <clr-control-helper>Bestimmt USt-Sätze und PDF-Formulierungen.</clr-control-helper>
+      </clr-select-container>
+    </section>
+
+    <!-- ─────────── Schritt 2 — Steuer ─────────── -->
+    <section *ngIf="step === 2" class="onb-step">
+      <h2>Wie versteuerst du?</h2>
+      <p class="hint">Für AT-EPU der wichtigste Schalter — Kleinunternehmer-Status entscheidet
+        ob USt am Beleg auftaucht oder nicht.</p>
+
+      <clr-toggle-container>
+        <label>Kleinunternehmer (§6 Abs. 1 Z 27 UStG)</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="isKleinunternehmer" [(ngModel)]="settings.isKleinunternehmer" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>An: keine USt auf Rechnungen, Hinweis automatisch im PDF.
+          Aus: Regelbesteuerung mit USt-Tabelle.</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-input-container>
+        <label>UID / USt-ID / MWST-Nr.</label>
+        <input clrInput name="vatId" [(ngModel)]="settings.vatId" placeholder="z.B. ATU12345678" />
+        <clr-control-helper>Bei Regelbesteuerung Pflicht. KU optional, mit „EX"-Suffix typisch.</clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container *ngIf="settings.country === 'AT'">
+        <label>GISA-Zahl</label>
+        <input clrInput name="gisaZahl" [(ngModel)]="settings.gisaZahl" placeholder="z.B. 21345678" />
+        <clr-control-helper>Gewerberegister-Nummer — §63 GewO verlangt sie auf Geschäftspapieren.</clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container *ngIf="settings.country === 'AT'">
+        <label>GISA-Behörde</label>
+        <input clrInput name="gisaAuthority" [(ngModel)]="settings.gisaAuthority" placeholder="Magistrat der Stadt Wien" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Steuernummer (Finanzamt)</label>
+        <input clrInput name="taxNumber" [(ngModel)]="settings.taxNumber" />
+        <clr-control-helper>Optional — erscheint im PDF-Footer.</clr-control-helper>
+      </clr-input-container>
+    </section>
+
+    <!-- ─────────── Schritt 3 — Bank + Kontakt ─────────── -->
+    <section *ngIf="step === 3" class="onb-step">
+      <h2>Wohin überweisen Kunden?</h2>
+      <p class="hint">IBAN landet im PDF-Footer. E-Mail/Telefon sind freiwillig und nur fürs Layout.</p>
+
+      <clr-input-container>
+        <label>IBAN</label>
+        <input clrInput name="iban" [(ngModel)]="settings.iban" placeholder="AT00 0000 0000 0000 0000" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>BIC</label>
+        <input clrInput name="bic" [(ngModel)]="settings.bic" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Bankname</label>
+        <input clrInput name="bankName" [(ngModel)]="settings.bankName" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>E-Mail</label>
+        <input clrInput type="email" name="email" [(ngModel)]="settings.email" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Telefon</label>
+        <input clrInput name="phone" [(ngModel)]="settings.phone" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Website</label>
+        <input clrInput name="website" [(ngModel)]="settings.website" />
+      </clr-input-container>
+    </section>
+
+    <!-- ─────────── Footer-Actions ─────────── -->
+    <div class="onb-actions">
+      <button type="button" class="btn btn-link" (click)="dismiss()">Später ausfüllen</button>
+      <div class="onb-actions-right">
+        <button type="button" class="btn btn-outline" *ngIf="step > 1" (click)="back()">Zurück</button>
+        <button type="button" class="btn btn-primary" *ngIf="step < 3" (click)="next()">Weiter</button>
+        <button type="button" class="btn btn-primary" *ngIf="step === 3" [disabled]="saving" (click)="finish()">
+          {{ saving ? 'Speichert…' : 'Setup abschließen' }}
+        </button>
+      </div>
+    </div>
+
+  </form>
+</div>

@@ -1,0 +1,47 @@
+.settings-page {
+  padding: 1rem 2rem;
+  max-width: 720px;
+
+  h2 {
+    margin-top: 0;
+  }
+
+  .hint {
+    color: var(--clr-color-neutral-700, #666);
+    margin-bottom: 1.5rem;
+  }
+
+  form {
+    margin-top: 1rem;
+  }
+
+  .actions {
+    margin-top: 1.5rem;
+  }
+}
+
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.logo-preview {
+  width: 180px;
+  height: 80px;
+  border: 1px dashed var(--clr-color-neutral-400, #ccc);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  overflow: hidden;
+
+  img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  &.empty { color: var(--clr-color-neutral-500, #888); font-size: 0.85rem; font-style: italic; }
+}
+.logo-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

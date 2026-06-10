@@ -1,0 +1,126 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Bank-Abgleich</h1>
+  </div>
+  <div class="page-head-actions"></div>
+</div>
+
+<main>
+  <p class="hint">
+    CAMT.053-XML deiner Bank hochladen — accountant erkennt offene
+    Rechnungen und schlägt Matches vor. Du bestätigst jede Zuordnung,
+    nichts wird automatisch als bezahlt markiert.
+  </p>
+
+  <div class="error-box" *ngIf="error">{{ error }}</div>
+
+  <section class="upload-section">
+    <label class="upload-drop">
+      <input type="file" accept=".xml,.camt,application/xml,text/xml"
+        (change)="onFile($event)" [disabled]="uploading" />
+      <div class="upload-inner">
+        <cds-icon shape="upload-cloud" size="md"></cds-icon>
+        <span *ngIf="!uploading">CAMT.053-Datei hier ablegen oder klicken</span>
+        <span *ngIf="uploading">Import läuft…</span>
+        <small>akzeptiert .xml von SEPA-fähigen AT/EU-Banken</small>
+      </div>
+    </label>
+    <button class="btn btn-secondary" (click)="load()" [disabled]="loading">
+      <cds-icon shape="refresh"></cds-icon>
+      Liste neu laden
+    </button>
+  </section>
+
+  <section class="summary" *ngIf="!loading">
+    <h2>{{ unmatched.length }} offene Buchungen warten auf Zuordnung</h2>
+  </section>
+
+  <div *ngIf="!loading && unmatched.length === 0" class="empty-state">
+    Keine offenen Bank-Buchungen. Lade eine CAMT.053-Datei hoch um zu starten,
+    oder die bereits importierten Buchungen wurden alle gematched oder
+    ignoriert.
+  </div>
+
+  <div *ngFor="let tx of unmatched" class="tx-card">
+    <div class="tx-header" (click)="toggle(tx)">
+      <div class="tx-main">
+        <div class="tx-amount" [class.credit]="tx.direction === 'credit'">
+          <span class="sign">{{ tx.direction === 'credit' ? '+' : '−' }}</span>
+          {{ fmt(tx.amount) }} {{ tx.currency }}
+        </div>
+        <div class="tx-meta">
+          <div class="tx-line">{{ fmtDate(tx.bookingDate) }} · {{ tx.counterparty || '(Gegenpartei unbekannt)' }}</div>
+          <div class="tx-memo">{{ tx.memo || '—' }}</div>
+        </div>
+      </div>
+      <div class="tx-cands-badge" *ngIf="tx.candidates.length">
+        <span class="cand-count">{{ tx.candidates.length }}</span>
+        <span>Vorschläge</span>
+      </div>
+      <div class="tx-cands-badge no-cand" *ngIf="!tx.candidates.length">
+        <span>0 Vorschläge</span>
+      </div>
+    </div>
+
+    <div class="tx-body" *ngIf="expandedTxId === tx.id">
+      <div class="tx-detail-meta">
+        <div><strong>Tx-ID:</strong> <code>{{ tx.txId }}</code></div>
+        <div *ngIf="tx.counterpartyIban"><strong>IBAN:</strong> <code>{{ tx.counterpartyIban }}</code></div>
+      </div>
+
+      <div *ngIf="tx.candidates.length" class="cand-list">
+        <h3>Match-Vorschläge</h3>
+        <table class="cand-table">
+          <thead>
+            <tr>
+              <th>Rechnung</th>
+              <th>Datum</th>
+              <th>Kunde</th>
+              <th class="num">Brutto</th>
+              <th>Begründung</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of tx.candidates">
+              <td>
+                <a [routerLink]="['/om/invoice', c.invoiceId]"
+                   class="invoice-link"
+                   title="Rechnung öffnen">
+                  <strong>{{ c.invoiceNumber }}</strong>
+                  <cds-icon shape="pop-out" size="12"></cds-icon>
+                </a>
+              </td>
+              <td>{{ fmtDate(c.invoiceDate) }}</td>
+              <td>{{ c.customerName || '—' }}</td>
+              <td class="num">{{ fmt(c.grossTotal) }} €</td>
+              <td>
+                <span class="score-pill" [ngClass]="scoreClass(c.score)">
+                  {{ scoreLabel(c.score) }} ({{ c.score }})
+                </span>
+                <ul class="reasons">
+                  <li *ngFor="let r of c.reasons">{{ r }}</li>
+                </ul>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-primary" (click)="confirmMatch(tx, c)">
+                  <cds-icon shape="check"></cds-icon> Bestätigen
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="!tx.candidates.length" class="no-cand-block">
+        <p>Keine offene Rechnung gefunden die zu dieser Buchung passt.</p>
+      </div>
+
+      <div class="tx-actions">
+        <button class="btn btn-sm btn-link" (click)="ignore(tx)">
+          <cds-icon shape="eye-hide"></cds-icon> Ignorieren (gehört zu keiner Rechnung)
+        </button>
+      </div>
+    </div>
+  </div>
+</main>

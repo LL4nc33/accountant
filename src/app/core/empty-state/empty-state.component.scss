@@ -1,0 +1,28 @@
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #666666;
+
+  .empty-state-icon {
+    opacity: 0.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-state-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    border-bottom: none !important;
+    color: #1A1A1A;
+  }
+
+  .empty-state-text {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .btn-primary {
+    background-color: #2F2F2F;
+    border-color: #2F2F2F;
+  }
+}

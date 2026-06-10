@@ -1,0 +1,49 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Projekte</h1>
+  </div>
+  <div class="page-head-actions">
+    <clr-checkbox-wrapper>
+      <input type="checkbox" clrCheckbox name="showArchivedProj"
+             [(ngModel)]="showArchived" (ngModelChange)="reload()" />
+      <label>Archivierte anzeigen</label>
+    </clr-checkbox-wrapper>
+    <a class="btn btn-primary" routerLink="/pm/project/new/edit">+ Neues Projekt</a>
+  </div>
+</div>
+
+<main>
+  <app-empty-state
+    *ngIf="!loading && rows.length === 0"
+    icon="briefcase"
+    title="Noch keine Projekte"
+    text="Lege dein erstes Projekt an, um Stunden zu buchen und daraus Rechnungen zu erzeugen."
+    ctaLabel="+ Neues Projekt"
+    [ctaRouterLink]="['/pm/project/new/edit']"
+  ></app-empty-state>
+
+  <clr-datagrid *ngIf="loading || rows.length > 0" [clrDgLoading]="loading">
+    <clr-dg-column>Projekt</clr-dg-column>
+    <clr-dg-column>Kunde</clr-dg-column>
+    <clr-dg-column style="width: 110px">Status</clr-dg-column>
+    <clr-dg-column style="width: 130px" class="dg-right">Offene h</clr-dg-column>
+    <clr-dg-column style="width: 150px" class="dg-right">Offener Betrag</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of rows">
+      <clr-dg-cell>
+        <a [routerLink]="['/pm/project', row.project.id]">{{ row.project.name }}</a>
+        <span *ngIf="row.project.archived" class="label" style="margin-left:.5rem;font-size:.7rem">Archiviert</span>
+      </clr-dg-cell>
+      <clr-dg-cell>{{ row.customerName }}</clr-dg-cell>
+      <clr-dg-cell>
+        <span class="label" [class.label-success]="row.project.status === 'active'" style="font-size:.7rem">
+          {{ row.project.status === 'active' ? 'Aktiv' : 'Geschlossen' }}
+        </span>
+      </clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.openHours | number:'1.1-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.openAmount | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>{{ rows.length }} Projekte</clr-dg-footer>
+  </clr-datagrid>
+</main>

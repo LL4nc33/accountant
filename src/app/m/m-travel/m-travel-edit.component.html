@@ -1,0 +1,73 @@
+<p *ngIf="loading" class="m-muted">Lädt…</p>
+
+<form *ngIf="!loading && trip" class="m-form" (ngSubmit)="save()">
+  <m-form-section title="Reise">
+    <label class="m-field">
+      <span>Reiseziel</span>
+      <input type="text" name="destination" [(ngModel)]="trip.destination" required />
+    </label>
+    <label class="m-field">
+      <span>Zweck</span>
+      <select name="purpose" [(ngModel)]="trip.purpose">
+        <option *ngFor="let p of purposes" [value]="p">{{ p }}</option>
+      </select>
+    </label>
+    <label class="m-field">
+      <span>Reisebeginn</span>
+      <input type="date" name="startDate" [(ngModel)]="trip.startDate" />
+    </label>
+    <label class="m-field">
+      <span>Reiseende</span>
+      <input type="date" name="endDate" [(ngModel)]="trip.endDate" />
+    </label>
+    <label class="m-field">
+      <span>Dauer (Stunden)</span>
+      <input type="number" step="0.5" name="durationHours" [(ngModel)]="trip.durationHours" inputmode="decimal" />
+    </label>
+    <label class="m-field">
+      <span>Nächtigungen</span>
+      <input type="number" step="1" name="nights" [(ngModel)]="trip.nights" inputmode="numeric" />
+    </label>
+    <label class="m-field">
+      <span>Gefahrene KM</span>
+      <input type="number" step="0.1" name="kmDriven" [(ngModel)]="trip.kmDriven" inputmode="decimal" />
+    </label>
+    <button type="button" class="m-pill" (click)="autoFill()">⚙ AT-Standardsätze übernehmen</button>
+  </m-form-section>
+
+  <m-form-section title="Kosten (EUR)">
+    <label class="m-field">
+      <span>Diäten</span>
+      <input type="number" step="0.01" name="mealsAmount" [(ngModel)]="trip.mealsAmount" inputmode="decimal" />
+    </label>
+    <label class="m-field">
+      <span>Nächtigung</span>
+      <input type="number" step="0.01" name="accommodationAmount" [(ngModel)]="trip.accommodationAmount" inputmode="decimal" />
+    </label>
+    <label class="m-field">
+      <span>KM-Geld</span>
+      <input type="number" step="0.01" name="kmAmount" [(ngModel)]="trip.kmAmount" inputmode="decimal" />
+    </label>
+    <label class="m-field">
+      <span>ÖV / Taxi</span>
+      <input type="number" step="0.01" name="publicTransportAmount" [(ngModel)]="trip.publicTransportAmount" inputmode="decimal" />
+    </label>
+    <label class="m-field">
+      <span>Sonstiges</span>
+      <input type="number" step="0.01" name="otherCostsAmount" [(ngModel)]="trip.otherCostsAmount" inputmode="decimal" />
+    </label>
+    <div class="m-total">Summe: <strong>{{ fmt(trip.totalAmount) }} €</strong></div>
+  </m-form-section>
+
+  <m-form-section title="Bemerkungen">
+    <label class="m-field">
+      <textarea name="notes" [(ngModel)]="trip.notes" rows="3"></textarea>
+    </label>
+  </m-form-section>
+
+  <div class="m-form-actions">
+    <button type="submit" class="m-pill m-pill-primary" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+    <button type="button" class="m-pill" (click)="toggleArchive()" *ngIf="!isNew">{{ trip.archived ? 'Reaktivieren' : 'Archivieren' }}</button>
+    <a routerLink="/m/travel" class="m-pill">Abbrechen</a>
+  </div>
+</form>

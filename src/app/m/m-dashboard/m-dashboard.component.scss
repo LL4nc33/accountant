@@ -1,0 +1,136 @@
+.m-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 2rem;
+}
+
+.m-dash-hero {
+  padding: 1rem 0 0.5rem;
+  border-bottom: 1px solid #E8E8E8;
+  margin-bottom: 0.5rem;
+
+  .m-dash-eyebrow {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #999;
+    margin-bottom: 0.4rem;
+  }
+
+  .m-dash-date {
+    margin: 0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.6rem;
+    line-height: 1.2;
+    font-weight: 400;
+    font-style: italic;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .m-dash-greeting {
+    color: #666;
+    margin: 0.5rem 0 0;
+  }
+}
+
+.m-dash-stat {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #E8E8E8;
+  border-radius: 6px;
+
+  &.primary {
+    background: linear-gradient(135deg, #fafafa, #fff);
+    border-left: 3px solid #1A1A1A;
+  }
+
+  .m-dash-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #888;
+    margin-bottom: 0.4rem;
+  }
+
+  .m-dash-value {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 2rem;
+    line-height: 1;
+    color: #1A1A1A;
+  }
+
+  .m-dash-meta {
+    color: #666;
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+  }
+
+  .negative { color: #B6633E; font-weight: 600; }
+}
+
+.m-dash-h {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.3rem;
+  margin: 1.5rem 0 0.5rem;
+  border-bottom: 1px solid #E8E8E8;
+  padding-bottom: 0.3rem;
+}
+
+.m-dash-recent {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.9rem 1rem;
+  background: white;
+  border: 1px solid #E8E8E8;
+  border-radius: 6px;
+}
+
+.m-dash-recent-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.3rem;
+}
+
+.m-dash-recent-num {
+  font-weight: 600;
+}
+
+.m-dash-recent-amount {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.1rem;
+}
+
+.m-dash-recent-meta {
+  font-size: 0.85rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.m-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  background: #E8E8E8;
+  color: #333;
+}
+
+.m-badge-info { background: #D4EAFF; color: #0072a3; }
+
+.m-dash-muted { color: #888; }
+
+.m-dash-loading {
+  text-align: center;
+  color: #888;
+  padding: 3rem 0;
+}

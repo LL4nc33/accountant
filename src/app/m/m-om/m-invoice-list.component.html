@@ -1,0 +1,33 @@
+<div class="m-list-toolbar">
+  <input type="search" [(ngModel)]="search" placeholder="Suchen…" class="m-search" />
+  <div class="m-pills">
+    <button class="m-pill" [class.active]="onlyOpen" (click)="onlyOpen = !onlyOpen; reload()">Nur offene</button>
+    <button class="m-pill" [class.active]="showArchived" (click)="showArchived = !showArchived; reload()">Archivierte</button>
+    <a class="m-pill m-pill-add" routerLink="/m/invoice/new/edit">+ Neue Rechnung</a>
+  </div>
+</div>
+
+<p *ngIf="loading" class="m-muted">Lädt …</p>
+
+<p *ngIf="!loading && filtered.length === 0" class="m-muted">
+  <span *ngIf="!search && !onlyOpen">Noch keine Rechnung. <a routerLink="/m/invoice/new/edit">Die erste anlegen →</a></span>
+  <span *ngIf="search">Kein Treffer für „{{ search }}".</span>
+  <span *ngIf="onlyOpen && !search">Keine offenen Rechnungen.</span>
+</p>
+
+<m-card *ngFor="let r of filtered" [link]="['/m/invoice', r.id]">
+  <div card-head>
+    <span>{{ r.number || '—' }} <span class="m-storno-tag" *ngIf="r.isStorno">Storno</span></span>
+    <span>{{ r.gross | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</span>
+  </div>
+  <div card-body>
+    <span>{{ r.customer }}</span>
+    <span>{{ r.date | date:'dd.MM.yyyy' }}</span>
+  </div>
+  <div card-status>
+    <span *ngIf="!r.finalized" class="m-badge">Entwurf</span>
+    <span *ngIf="r.finalized && !r.paid" class="m-badge m-badge-warning">Offen</span>
+    <span *ngIf="r.paid" class="m-badge m-badge-success">Bezahlt</span>
+    <span *ngIf="r.archived" class="m-badge m-badge-warning">Archiviert</span>
+  </div>
+</m-card>

@@ -1,0 +1,329 @@
+<app-edit-shell title="Firmen-Einstellungen" subtitle="Diese Daten erscheinen auf allen Rechnungen, Mahnungen und Angeboten." [showSave]="true" [saving]="saving" (save)="save()" *ngIf="settings">
+
+  <ng-template editTab="Stammdaten">
+    <form clrForm clrLayout="horizontal" (ngSubmit)="save()">
+      <clr-alert *ngIf="settings.country === 'AT' && settings.isKleinunternehmer && !settings.gisaZahl"
+                 clrAlertType="info" [clrAlertClosable]="false">
+        <clr-alert-item>
+          <span class="alert-text">
+            Als Kleinunternehmer mit Gewerbeberechtigung bist du nach §63 GewO verpflichtet,
+            <b>GISA-Zahl</b> und <b>Behörde</b> auf Geschäftspapieren anzugeben.
+          </span>
+        </clr-alert-item>
+      </clr-alert>
+
+      <clr-input-container>
+        <label>Firmenname</label>
+        <input clrInput name="name" [(ngModel)]="settings.name" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Namenszusatz / Rechtsform</label>
+        <input clrInput name="nameAddon" [(ngModel)]="settings.nameAddon" placeholder="e.U., GmbH, …" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Straße</label>
+        <input clrInput name="addressStreet" [(ngModel)]="settings.addressStreet" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>PLZ</label>
+        <input clrInput name="addressZip" [(ngModel)]="settings.addressZip" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Stadt</label>
+        <input clrInput name="addressCity" [(ngModel)]="settings.addressCity" />
+      </clr-input-container>
+
+      <clr-select-container>
+        <label>Land</label>
+        <select clrSelect name="country" [(ngModel)]="settings.country">
+          <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+        </select>
+      </clr-select-container>    </form>
+  </ng-template>
+
+  <ng-template editTab="Steuer & UID">
+    <form clrForm clrLayout="horizontal" (ngSubmit)="save()">
+      <clr-input-container>
+        <label>UID / USt-ID / MWST-Nr.</label>
+        <input clrInput name="vatId" [(ngModel)]="settings.vatId" placeholder="z.B. ATU12345678" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>GISA-Zahl</label>
+        <input clrInput name="gisaZahl" [(ngModel)]="settings.gisaZahl" placeholder="z.B. 21345678" />
+        <clr-control-helper>Gewerberegister-Nummer (§63 GewO)</clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>GISA-Behörde</label>
+        <input clrInput name="gisaAuthority" [(ngModel)]="settings.gisaAuthority" placeholder="z.B. Magistrat der Stadt Wien" />
+        <clr-control-helper>Zuständige Bezirksbehörde, bei der die Gewerbeberechtigung registriert ist</clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Steuernummer (Finanzamt)</label>
+        <input clrInput name="taxNumber" [(ngModel)]="settings.taxNumber" />
+        <clr-control-helper>Optional — wird im PDF-Footer angezeigt</clr-control-helper>
+      </clr-input-container>
+
+      <clr-checkbox-container>
+        <clr-checkbox-wrapper>
+          <input type="checkbox" clrCheckbox name="isKleinunternehmer" [(ngModel)]="settings.isKleinunternehmer" />
+          <label>Kleinunternehmer (§6 Abs. 1 Z 27 UStG)</label>
+        </clr-checkbox-wrapper>
+        <clr-control-helper>
+          Wenn aktiviert: alle Rechnungen ohne USt, mit gesetzlich vorgeschriebenem Vermerk im PDF-Footer.
+        </clr-control-helper>
+      </clr-checkbox-container>
+
+      <ng-container *ngIf="settings.moduleSvs">
+        <p class="hint" style="margin-top: 1.5rem">
+          <strong>SVS-Vorschau:</strong> Erstes Selbständigkeits-Jahr — die Vorschau weiß damit,
+          ob du in der vorläufigen Phase (Jahr 1+2 auf Mindest-BGL) oder schon in der
+          Endabrechnungs-Phase bist.
+        </p>
+        <clr-number-input-container>
+          <label>SVS — erstes Geschäftsjahr</label>
+          <input clrNumberInput type="number" step="1" name="svsStartYear" [(ngModel)]="settings.svsStartYear" placeholder="z.B. 2024" />
+          <clr-control-helper>Vierstellige Jahreszahl. Leer/0 = Annahme aktuelles Jahr.</clr-control-helper>
+        </clr-number-input-container>
+      </ng-container>    </form>
+  </ng-template>
+
+  <ng-template editTab="Bank & Kontakt">
+    <form clrForm clrLayout="horizontal" (ngSubmit)="save()">
+      <h2>Bankverbindung</h2>
+      <p class="hint">Erscheint auf jeder Rechnung im PDF-Footer.</p>
+
+      <clr-input-container>
+        <label>IBAN</label>
+        <input clrInput name="iban" [(ngModel)]="settings.iban" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>BIC</label>
+        <input clrInput name="bic" [(ngModel)]="settings.bic" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Bankname</label>
+        <input clrInput name="bankName" [(ngModel)]="settings.bankName" />
+      </clr-input-container>
+
+      <h2 style="margin-top: 2rem">Kontaktdaten</h2>
+
+      <clr-input-container>
+        <label>E-Mail</label>
+        <input clrInput name="email" type="email" [(ngModel)]="settings.email" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Telefon</label>
+        <input clrInput name="phone" [(ngModel)]="settings.phone" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Website</label>
+        <input clrInput name="website" [(ngModel)]="settings.website" />
+      </clr-input-container>    </form>
+  </ng-template>
+
+  <ng-template editTab="Rechnungs-Layout">
+    <form clrForm clrLayout="horizontal" (ngSubmit)="save()">
+      <h2>Logo</h2>
+      <p class="hint">
+        Wird im PDF-Header der Rechnungen oben rechts platziert.
+        PNG mit transparentem Hintergrund oder JPG, empfohlen ~120 × 60 px. Max 500 KB.
+      </p>
+
+      <div class="logo-row">
+        <div class="logo-preview" *ngIf="settings.logoDataUrl">
+          <img [src]="settings.logoDataUrl" alt="Aktuelles Logo" />
+        </div>
+        <div class="logo-preview empty" *ngIf="!settings.logoDataUrl">
+          kein Logo
+        </div>
+        <div class="logo-actions">
+          <label class="btn btn-outline">
+            {{ settings.logoDataUrl ? 'Logo ersetzen' : 'Logo hochladen' }}
+            <input type="file" accept="image/png,image/jpeg,image/svg+xml" (change)="onLogoFile($event)" hidden />
+          </label>
+          <button type="button" class="btn btn-outline btn-danger" *ngIf="settings.logoDataUrl" (click)="removeLogo()">Entfernen</button>
+        </div>
+      </div>
+
+      <h2 style="margin-top: 2rem">Skonto-Defaults</h2>
+      <p class="hint">
+        Werden in neue Rechnungen vorbelegt. Pro Rechnung jederzeit überschreibbar.
+        0 % bedeutet: kein Skonto auf der Rechnung.
+      </p>
+
+      <clr-number-input-container>
+        <label>Standard Skonto-Satz (%)</label>
+        <input clrNumberInput type="number" step="0.1" min="0" max="100" name="defaultSkontoPercent" [(ngModel)]="settings.defaultSkontoPercent" />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label>Standard Skonto-Frist (Tage)</label>
+        <input clrNumberInput type="number" step="1" min="0" name="defaultSkontoDays" [(ngModel)]="settings.defaultSkontoDays" />
+      </clr-number-input-container>    </form>
+  </ng-template>
+
+  <ng-template editTab="Mahnwesen">
+    <form clrForm clrLayout="horizontal" (ngSubmit)="save()">
+      <p class="hint">
+        Voreinstellungen für Mahnungen. Verzugszinssatz B2B = ECB-Basiszinssatz + 9,2 Prozentpunkte (§456 UGB),
+        B2C = gesetzlich 4 % p.a. (§1000 ABGB). Mahnspesen-Pauschale €40 ab Stufe 2 (§1333 ABGB).
+        Mahntexte editierbar — werden beim Anlegen einer neuen Mahnung vorausgefüllt.
+      </p>
+
+      <clr-number-input-container>
+        <label>Verzugszinssatz B2B (% p.a.)</label>
+        <input clrNumberInput type="number" step="0.1" name="defaultInterestRateB2B" [(ngModel)]="settings.defaultInterestRateB2B" />
+        <clr-control-helper>ECB-Basiszinssatz + 9,2 PP. Aktuell ~12,2 %. Halbjährliche Updates (1.1. + 1.7.) prüfen.</clr-control-helper>
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label>Verzugszinssatz B2C (% p.a.)</label>
+        <input clrNumberInput type="number" step="0.1" name="defaultInterestRateB2C" [(ngModel)]="settings.defaultInterestRateB2C" />
+        <clr-control-helper>Gesetzlich 4 % p.a. nach §1000 ABGB.</clr-control-helper>
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label>Mahnspesen ab Stufe 2 (€)</label>
+        <input clrNumberInput type="number" step="1" name="defaultReminderFee" [(ngModel)]="settings.defaultReminderFee" />
+        <clr-control-helper>Pauschale Entschädigung nach §1333 ABGB (B2B). Standard 40 €.</clr-control-helper>
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label>Tage bis 1. Mahnung (nach Fälligkeit)</label>
+        <input clrNumberInput type="number" step="1" name="daysUntilFirstReminder" [(ngModel)]="settings.daysUntilFirstReminder" />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label>Tage zwischen Mahnungen</label>
+        <input clrNumberInput type="number" step="1" name="daysBetweenReminders" [(ngModel)]="settings.daysBetweenReminders" />
+      </clr-number-input-container>
+
+      <clr-textarea-container>
+        <label>Mahntext Stufe 1 (Erinnerung)</label>
+        <textarea clrTextarea name="reminderText1" [(ngModel)]="settings.reminderText1" rows="4"></textarea>
+      </clr-textarea-container>
+
+      <clr-textarea-container>
+        <label>Mahntext Stufe 2 (Mahnung)</label>
+        <textarea clrTextarea name="reminderText2" [(ngModel)]="settings.reminderText2" rows="4"></textarea>
+      </clr-textarea-container>
+
+      <clr-textarea-container>
+        <label>Mahntext Stufe 3 (Letzte Mahnung)</label>
+        <textarea clrTextarea name="reminderText3" [(ngModel)]="settings.reminderText3" rows="4"></textarea>
+      </clr-textarea-container>    </form>
+  </ng-template>
+
+  <ng-template editTab="KI-Assistent">
+    <form clrForm clrLayout="horizontal" (ngSubmit)="save()">
+      <p class="hint">
+        Spricht jede OpenAI-kompatible Inference-API: <code>llama-server</code> (llama.cpp),
+        Ollama, LM Studio, vLLM, LocalAI, oder einen Hosted-Provider.
+        <br>Für Self-Host empfohlen, da Kunden-/Rechnungsdaten ins Modell gehen.
+        <br>Modul aktivieren unter Einstellungen → Module.
+      </p>
+
+      <clr-input-container>
+        <label>Base-URL</label>
+        <input clrInput name="llmBaseUrl" [(ngModel)]="settings.llmBaseUrl" placeholder="http://localhost:8080/v1" />
+        <clr-control-helper>
+          Endet auf <code>/v1</code>. Beispiele: <code>http://localhost:8080/v1</code> (llama.cpp),
+          <code>http://localhost:11434/v1</code> (Ollama).
+        </clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>API-Key</label>
+        <input clrInput type="password" name="llmApiKey" [(ngModel)]="settings.llmApiKey" placeholder="leer oder &quot;none&quot; für lokale Backends" />
+        <clr-control-helper>Lokale Backends brauchen keinen Key. Bei Hosted: Provider-Key eintragen.</clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Modell</label>
+        <input clrInput name="llmModel" [(ngModel)]="settings.llmModel" placeholder="ministral-3-3b-instruct-2512" />
+        <clr-control-helper>
+          Empfehlung Edge: <code>Ministral-3-3B-Instruct-2512</code> (~2 GB, deutsch),
+          <code>Qwen3.5-9B-MTP</code> (~5.5 GB) oder <code>gemma-4-12b-it</code> (~8 GB).
+          llama.cpp starten mit <code>--jinja</code> Flag für korrektes Tool-Use-Template.
+        </clr-control-helper>
+      </clr-input-container>
+
+      <h2 style="margin-top: 2rem">Anrede</h2>
+      <clr-select-container>
+        <label>Wie sprechen dich die Agenten an?</label>
+        <select clrSelect name="agentAddressForm" [(ngModel)]="settings.agentAddressForm">
+          <option value="du">Per Du (locker)</option>
+          <option value="sie">Gesiezt (förmlich)</option>
+        </select>
+        <clr-control-helper>Gilt für Buchhalter und Support gleichermaßen.</clr-control-helper>
+      </clr-select-container>
+
+      <clr-input-container>
+        <label>Dein Name</label>
+        <input clrInput name="agentUserName" [(ngModel)]="settings.agentUserName" placeholder="z.B. Lance" />
+        <clr-control-helper>Optional — die Agenten sprechen dich dann persönlich an.</clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Name Buchhalter-Agent</label>
+        <input clrInput name="accountantAgentName" [(ngModel)]="settings.accountantAgentName" placeholder="Buchhalter" />
+        <clr-control-helper>Optional — gib deinem Buchhaltungs-Agenten einen eigenen Namen.</clr-control-helper>
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>Name Support-Agent</label>
+        <input clrInput name="supportAgentName" [(ngModel)]="settings.supportAgentName" placeholder="Support" />
+        <clr-control-helper>Optional — z.B. „Vera" für deinen App-Assistenten.</clr-control-helper>
+      </clr-input-container>
+
+      <h2 style="margin-top: 2rem">Reflexion</h2>
+      <clr-toggle-container>
+        <label>Reflexions-Modus</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="agentReflection" [(ngModel)]="settings.agentReflection" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>
+          Der Agent prüft seine eigene Antwort gegen die Daten und bessert nach — gründlicher,
+          aber spürbar langsamer (zusätzliche LLM-Runden). Auf kleinen lokalen Modellen merklich;
+          lohnt sich vor allem mit einem 7B+-Modell.
+        </clr-control-helper>
+      </clr-toggle-container>
+
+      <h2 style="margin-top: 2rem">Support-Agent</h2>
+      <p class="hint">
+        Der <strong>Support-Agent</strong> kennt die App selbst — er erklärt, wo Einstellungen liegen,
+        und navigiert dich direkt hin. Hier legst du fest, wie weit er gehen darf.
+      </p>
+
+      <clr-select-container>
+        <label>Berechtigung</label>
+        <select clrSelect name="supportAgentPermission" [(ngModel)]="settings.supportAgentPermission">
+          <option value="explain">Nur erklären + hinnavigieren (sicher)</option>
+          <option value="confirm">Änderungen vorschlagen (du bestätigst)</option>
+          <option value="auto">Einstellungen direkt ändern (ohne Rückfrage)</option>
+        </select>
+        <clr-control-helper>
+          „Direkt ändern" ist mächtig, aber riskant — der Kleinunternehmer-Status z.B. wirkt auf alle Rechnungen.
+        </clr-control-helper>
+      </clr-select-container>
+
+      <p class="hint" style="margin-top: 1.5rem">
+        <strong>Agent-Skills:</strong> Die Verhaltens-Regeln des KI-Assistenten liegen als
+        Markdown-Dateien unter <code>$DATA_DIR/agents/skills/*.md</code>.
+        Bei jedem Container-Start werden fehlende Defaults aus dem Image kopiert — bereits
+        existierende Dateien bleiben unangetastet, deine Edits überleben Updates.
+      </p>    </form>
+  </ng-template>
+
+</app-edit-shell>

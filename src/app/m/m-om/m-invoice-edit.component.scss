@@ -1,0 +1,16 @@
+// Spezifische Overrides für Invoice-Edit
+.m-pill.m-pill-warning {
+  background: #B6633E;
+  color: white;
+  border-color: #B6633E;
+}
+
+.m-kv {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+
+  dt { color: #888; font-size: 0.85rem; }
+  dd { margin: 0; font-size: 0.95rem; }
+}

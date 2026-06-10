@@ -1,0 +1,45 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Eigene Arbeitszeit</h1>
+    <p>Monats-Aggregation deiner Zeitbuchungen — verteilt auf Projekte, getrennt nach abgerechnet vs nicht-abgerechnet.</p>
+  </div>
+  <div class="page-head-actions">
+    <select [(ngModel)]="selectedYear" name="selectedYear" (ngModelChange)="onYearChange()" class="year-picker">
+      <option *ngFor="let y of availableYears" [ngValue]="y">{{ y }}</option>
+    </select>
+  </div>
+</div>
+
+<main>
+  <div class="year-bar" *ngIf="!loading">
+    <div class="year-totals">
+      <div><span class="label">Gesamt</span><span class="value">{{ yearTotal | number:'1.1-1':'de-AT' }} h</span></div>
+      <div><span class="label">Abgerechnet</span><span class="value">{{ yearBilled | number:'1.1-1':'de-AT' }} h</span></div>
+      <div><span class="label">Offen</span><span class="value">{{ yearUnbilled | number:'1.1-1':'de-AT' }} h</span></div>
+    </div>
+  </div>
+
+  <clr-datagrid *ngIf="!loading && monthRows.length > 0">
+    <clr-dg-column>Monat</clr-dg-column>
+    <clr-dg-column>Gesamt</clr-dg-column>
+    <clr-dg-column>Abgerechnet</clr-dg-column>
+    <clr-dg-column>Offen</clr-dg-column>
+    <clr-dg-column>Projekte</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of monthRows">
+      <clr-dg-cell>{{ row.label }}</clr-dg-cell>
+      <clr-dg-cell><strong>{{ row.totalHours | number:'1.1-1':'de-AT' }} h</strong></clr-dg-cell>
+      <clr-dg-cell>{{ row.billedHours | number:'1.1-1':'de-AT' }} h</clr-dg-cell>
+      <clr-dg-cell>{{ row.unbilledHours | number:'1.1-1':'de-AT' }} h</clr-dg-cell>
+      <clr-dg-cell>
+        <span *ngFor="let p of row.byProject" class="project-chip" [class.billed]="p.billed">
+          {{ p.projectName }} ({{ p.hours | number:'1.1-1':'de-AT' }} h)
+        </span>
+      </clr-dg-cell>
+    </clr-dg-row>
+  </clr-datagrid>
+
+  <p *ngIf="!loading && monthRows.length === 0" class="muted">
+    Keine Zeitbuchungen für {{ selectedYear }} gefunden. Lege Projekte an und buche Stunden — sie erscheinen hier monatsweise aggregiert.
+  </p>
+</main>

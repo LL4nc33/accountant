@@ -1,0 +1,136 @@
+<p *ngIf="loading" class="m-muted">Lädt …</p>
+
+<form *ngIf="!loading && settings" class="m-form" (ngSubmit)="save()">
+
+  <m-form-section title="Firma">
+    <label class="m-field">
+      <span>Firmenname</span>
+      <input type="text" name="name" [(ngModel)]="settings.name" />
+    </label>
+    <label class="m-field">
+      <span>Rechtsform / Zusatz</span>
+      <input type="text" name="nameAddon" [(ngModel)]="settings.nameAddon" placeholder="e.U., GmbH, …" />
+    </label>
+    <label class="m-field">
+      <span>Land</span>
+      <select name="country" [(ngModel)]="settings.country">
+        <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+      </select>
+    </label>
+  </m-form-section>
+
+  <m-form-section title="Logo">
+    <div class="m-logo-row" *ngIf="settings.logoDataUrl">
+      <img [src]="settings.logoDataUrl" alt="Logo" />
+    </div>
+    <div class="m-logo-row empty" *ngIf="!settings.logoDataUrl">kein Logo gesetzt</div>
+    <label class="m-field">
+      <span>{{ settings.logoDataUrl ? 'Logo ersetzen' : 'Logo hochladen' }}</span>
+      <input type="file" accept="image/png,image/jpeg,image/svg+xml" (change)="onLogoFile($event)" />
+    </label>
+    <button type="button" class="m-pill" (click)="removeLogo()" *ngIf="settings.logoDataUrl">Logo entfernen</button>
+  </m-form-section>
+
+  <m-form-section title="Adresse">
+    <label class="m-field">
+      <span>Straße</span>
+      <input type="text" name="addressStreet" [(ngModel)]="settings.addressStreet" />
+    </label>
+    <label class="m-field">
+      <span>PLZ</span>
+      <input type="text" name="addressZip" [(ngModel)]="settings.addressZip" />
+    </label>
+    <label class="m-field">
+      <span>Stadt</span>
+      <input type="text" name="addressCity" [(ngModel)]="settings.addressCity" />
+    </label>
+  </m-form-section>
+
+  <m-form-section title="Steuer-Status">
+    <label class="m-field">
+      <input type="checkbox" name="isKleinunternehmer" [(ngModel)]="settings.isKleinunternehmer" /> Kleinunternehmer (§6 Abs. 1 Z 27 UStG)
+    </label>
+    <label class="m-field">
+      <span>UID / USt-ID</span>
+      <input type="text" name="vatId" [(ngModel)]="settings.vatId" placeholder="z.B. ATU12345678" />
+    </label>
+    <label class="m-field" *ngIf="settings.country === 'AT'">
+      <span>GISA-Zahl</span>
+      <input type="text" name="gisaZahl" [(ngModel)]="settings.gisaZahl" />
+    </label>
+    <label class="m-field" *ngIf="settings.country === 'AT'">
+      <span>GISA-Behörde</span>
+      <input type="text" name="gisaAuthority" [(ngModel)]="settings.gisaAuthority" />
+    </label>
+    <label class="m-field">
+      <span>Steuernummer (Finanzamt)</span>
+      <input type="text" name="taxNumber" [(ngModel)]="settings.taxNumber" />
+    </label>
+    <label class="m-field" *ngIf="settings.moduleSvs">
+      <span>SVS — erstes Selbständigkeits-Jahr</span>
+      <input type="number" step="1" name="svsStartYear" [(ngModel)]="settings.svsStartYear" placeholder="z.B. 2024" inputmode="numeric" />
+    </label>
+  </m-form-section>
+
+  <m-form-section title="Bank + Kontakt">
+    <label class="m-field">
+      <span>IBAN</span>
+      <input type="text" name="iban" [(ngModel)]="settings.iban" />
+    </label>
+    <label class="m-field">
+      <span>BIC</span>
+      <input type="text" name="bic" [(ngModel)]="settings.bic" />
+    </label>
+    <label class="m-field">
+      <span>Bankname</span>
+      <input type="text" name="bankName" [(ngModel)]="settings.bankName" />
+    </label>
+    <label class="m-field">
+      <span>E-Mail</span>
+      <input type="email" name="email" [(ngModel)]="settings.email" />
+    </label>
+    <label class="m-field">
+      <span>Telefon</span>
+      <input type="tel" name="phone" [(ngModel)]="settings.phone" />
+    </label>
+    <label class="m-field">
+      <span>Standard-Stundensatz (€)</span>
+      <input type="number" step="0.01" name="defaultHourlyRate" [(ngModel)]="settings.defaultHourlyRate" inputmode="decimal" />
+    </label>
+  </m-form-section>
+
+  <m-form-section title="SMTP / E-Mail-Versand">
+    <label class="m-field">
+      <span>SMTP-Host</span>
+      <input type="text" name="smtpHost" [(ngModel)]="settings.smtpHost" />
+    </label>
+    <label class="m-field">
+      <span>SMTP-Port</span>
+      <input type="number" name="smtpPort" [(ngModel)]="settings.smtpPort" inputmode="numeric" />
+    </label>
+    <label class="m-field">
+      <input type="checkbox" name="smtpSecure" [(ngModel)]="settings.smtpSecure" /> TLS / STARTTLS
+    </label>
+    <label class="m-field">
+      <span>SMTP-Benutzer</span>
+      <input type="text" name="smtpUser" [(ngModel)]="settings.smtpUser" />
+    </label>
+    <label class="m-field">
+      <span>SMTP-Passwort</span>
+      <input type="password" name="smtpPassword" [(ngModel)]="settings.smtpPassword" />
+    </label>
+    <label class="m-field">
+      <span>Absender-E-Mail (From)</span>
+      <input type="email" name="smtpFromAddress" [(ngModel)]="settings.smtpFromAddress" />
+    </label>
+    <label class="m-field">
+      <span>Absender-Name</span>
+      <input type="text" name="smtpFromName" [(ngModel)]="settings.smtpFromName" />
+    </label>
+  </m-form-section>
+
+  <div class="m-form-actions">
+    <button type="submit" class="m-pill m-pill-primary" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+  </div>
+
+</form>

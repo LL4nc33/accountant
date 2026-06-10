@@ -1,0 +1,76 @@
+<main class="assets">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>Anlagenverzeichnis</h1>
+      <p>
+        Abnutzbare körperliche Wirtschaftsgüter mit linearer AfA (§7 EStG).
+        Halbjahresregel automatisch berücksichtigt. GWG ≤ 1.000 € werden sofort vollständig abgesetzt (§13 EStG).
+      </p>
+    </div>
+    <div class="page-head-actions">
+      <label class="checkbox-inline">
+        <input type="checkbox" [(ngModel)]="showArchived" (ngModelChange)="refresh()" />
+        Archivierte anzeigen
+      </label>
+      <a class="btn btn-primary" routerLink="/assets/new/edit">+ Neues Wirtschaftsgut</a>
+    </div>
+  </div>
+
+  <section class="kpi-row" *ngIf="!loading">
+    <div class="kpi">
+      <div class="kpi-label">AfA · {{ currentYear }}</div>
+      <div class="kpi-value">{{ fmt(totalAfaCurrentYear()) }} €</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Restbuchwert · Ende {{ currentYear }}</div>
+      <div class="kpi-value">{{ fmt(totalBookValue()) }} €</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Anzahl Anlagen</div>
+      <div class="kpi-value">{{ assets.length }}</div>
+    </div>
+  </section>
+
+  <p *ngIf="loading" class="muted">Lade…</p>
+
+  <table class="asset-table" *ngIf="!loading && assets.length">
+    <thead>
+      <tr>
+        <th>Bezeichnung</th>
+        <th>Kategorie</th>
+        <th>Anschaffung</th>
+        <th class="right">AK netto</th>
+        <th>ND</th>
+        <th class="right">AfA {{ currentYear }}</th>
+        <th class="right">Buchwert</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let a of assets" [class.archived]="a.archived" [class.fully-depreciated]="isFullyDepreciated(a)">
+        <td>
+          <a [routerLink]="['/assets', a.id]">{{ a.name }}</a>
+          <span class="badge gwg" *ngIf="a.isGwg || a.acquisitionCost <= 1000">GWG</span>
+        </td>
+        <td>{{ a.category }}</td>
+        <td>{{ a.acquisitionDate | date:'dd.MM.yyyy' }}</td>
+        <td class="right">{{ fmt(a.acquisitionCost) }}</td>
+        <td>{{ a.usefulLifeYears }}J</td>
+        <td class="right">{{ fmt(afaCurrentYear(a)) }}</td>
+        <td class="right">{{ fmt(bookValue(a)) }}</td>
+        <td>
+          <a [routerLink]="['/assets', a.id, 'edit']" class="link">bearbeiten</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!loading && !assets.length" class="muted">
+    Noch keine Wirtschaftsgüter erfasst. <a routerLink="/assets/new/edit">Das erste anlegen →</a>
+  </p>
+
+  <p class="footer-hint">
+    Anlagenverzeichnis-Pflicht §125 BAO ab Anschaffungskosten > 800 €. AfA-Tabelle BMF gilt als Anhaltspunkt
+    für übliche Nutzungsdauern (3 Jahre Computer/Handy, 5 Jahre Smartphone, 7 Jahre Möbel, 8 Jahre PKW).
+  </p>
+</main>

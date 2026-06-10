@@ -1,0 +1,148 @@
+<main>
+  <div class="analytics-toolbar">
+    <div class="vs-prev muted" *ngIf="data?.previous">
+      Vergleich gegen {{ data!.previous.periodLabel }}
+    </div>
+    <div class="period-picker">
+      <select [(ngModel)]="granularity" (ngModelChange)="load()" class="granularity-picker" aria-label="Granularität">
+        <option value="year">Jahres-Analyse</option>
+        <option value="month">Monats-Analyse</option>
+      </select>
+      <select *ngIf="granularity === 'month'" [(ngModel)]="selectedMonth" (ngModelChange)="load()" class="month-picker" aria-label="Monat">
+        <option *ngFor="let l of monthLabels; let i = index" [ngValue]="i + 1">{{ l }}</option>
+      </select>
+      <select [(ngModel)]="selectedYear" (ngModelChange)="load()" class="year-picker" aria-label="Jahr">
+        <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">Lade Analyse…</div>
+  <div *ngIf="error" class="error-box">{{ error }}</div>
+
+  <ng-container *ngIf="data && !loading">
+    <section class="kpi-grid">
+      <app-kpi-card
+        [label]="'Rechnungssumme ' + data.current.periodLabel"
+        [value]="fmt(data.current.periodTotal.invoicedGross) + ' €'"
+        [delta]="fmtDelta(data.deltas.invoicedGross) + ' € vs. ' + data.previous.periodLabel"
+        [deltaDirection]="deltaDir(data.deltas.invoicedGross)"
+        variant="primary"></app-kpi-card>
+      <app-kpi-card
+        label="Eingegangen"
+        [value]="fmt(data.current.periodTotal.paidGross) + ' €'"
+        [subtitle]="data.current.counts.paid + ' bezahlte Rechnungen'"
+        variant="success"></app-kpi-card>
+      <app-kpi-card
+        label="Aufwand"
+        [value]="fmt(data.current.periodTotal.expenseGross) + ' €'"
+        [delta]="fmtDelta(data.deltas.expenseGross) + ' € vs. ' + data.previous.periodLabel"
+        [deltaDirection]="deltaDir(-data.deltas.expenseGross)"
+        variant="warning"></app-kpi-card>
+      <app-kpi-card
+        label="Saldo (Umsatz − Aufwand)"
+        [value]="fmt(data.current.periodTotal.saldo) + ' €'"
+        [delta]="fmtDelta(data.deltas.saldo) + ' € vs. ' + data.previous.periodLabel"
+        [deltaDirection]="deltaDir(data.deltas.saldo)"
+        [variant]="data.current.periodTotal.saldo < 0 ? 'danger' : 'primary'"></app-kpi-card>
+    </section>
+
+    <section class="status-grid">
+      <div class="status-pill draft">
+        <span class="num">{{ data.current.counts.drafts }}</span>
+        <span class="lbl">Entwürfe</span>
+      </div>
+      <div class="status-pill open">
+        <span class="num">{{ data.current.counts.finalOpen }}</span>
+        <span class="lbl">festgeschr. offen</span>
+      </div>
+      <div class="status-pill paid">
+        <span class="num">{{ data.current.counts.paid }}</span>
+        <span class="lbl">bezahlt</span>
+      </div>
+      <div class="status-pill overdue">
+        <span class="num">{{ data.current.counts.overdue }}</span>
+        <span class="lbl">überfällig</span>
+      </div>
+    </section>
+
+    <h2>{{ trendHeading }}</h2>
+    <div class="monthly-chart">
+      <!-- Hover-Tooltip: relativ zum Chart-Container, x-Position folgt der
+           Bucket-Mitte des gehoverten Monats. pointer-events:none damit das
+           Tooltip-Div selbst keine mouseleave-Events triggert. -->
+      <div class="chart-tooltip" *ngIf="hoveredBucket"
+           [style.left.%]="((hoveredIndex + 0.5) / 12) * 100">
+        <div class="tt-label">{{ hoveredBucket.label }}<span *ngIf="hoveredBucket.year !== data.current.year"> {{ hoveredBucket.year }}</span></div>
+        <div class="tt-row"><span class="tt-swatch swatch-invoiced"></span><span class="tt-key">Fakturiert</span><span class="tt-val">{{ fmt(hoveredBucket.invoiced) }} €</span></div>
+        <div class="tt-row"><span class="tt-swatch swatch-paid"></span><span class="tt-key">Bezahlt</span><span class="tt-val">{{ fmt(hoveredBucket.paid) }} €</span></div>
+        <div class="tt-row"><span class="tt-swatch swatch-expense"></span><span class="tt-key">Aufwand</span><span class="tt-val">{{ fmt(hoveredBucket.expense) }} €</span></div>
+      </div>
+      <svg viewBox="0 0 720 200" preserveAspectRatio="none" class="chart-svg">
+        <g *ngFor="let m of data.current.monthly; let i = index"
+           class="month-group"
+           (mouseenter)="onHoverBucket(m, i)"
+           (mouseleave)="onLeaveBucket()">
+          <!-- Unsichtbare Hit-Area über die volle Monatsspalte, damit Hover
+               auch zwischen den Balken funktioniert (nicht nur exakt auf
+               einem dünnen Rect). -->
+          <rect [attr.x]="i * 60" y="0" width="60" height="200" class="hit-area" />
+          <rect
+            [attr.x]="i * 60 + 8"
+            [attr.y]="180 - barHeight(m.invoiced, 160)"
+            width="22"
+            [attr.height]="barHeight(m.invoiced, 160)"
+            class="bar bar-invoiced"
+            [class.active]="hoveredIndex === i"
+          />
+          <rect
+            [attr.x]="i * 60 + 32"
+            [attr.y]="180 - barHeight(m.expense, 160)"
+            width="22"
+            [attr.height]="barHeight(m.expense, 160)"
+            class="bar bar-expense"
+            [class.active]="hoveredIndex === i"
+          />
+          <text [attr.x]="i * 60 + 30" y="195" text-anchor="middle" class="label">{{ m.label }}</text>
+        </g>
+      </svg>
+      <div class="chart-legend">
+        <span><span class="legend-swatch swatch-invoiced"></span> Rechnungssumme</span>
+        <span><span class="legend-swatch swatch-expense"></span> Aufwand</span>
+        <span class="muted">max {{ fmt(monthlyMax) }} €</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <section class="card">
+        <h2>Top 10 Kunden{{ rankingScope }}</h2>
+        <p *ngIf="!data.current.topCustomers.length" class="muted">Noch keine festgeschriebenen Rechnungen.</p>
+        <div *ngFor="let c of data.current.topCustomers" class="ranked-row">
+          <div class="row-head">
+            <span class="row-name">{{ c.name }}</span>
+            <span class="row-value">{{ fmt(c.gross) }} €</span>
+          </div>
+          <div class="row-bar-track">
+            <div class="row-bar" [style.width.%]="(c.gross / topCustomerMax()) * 100"></div>
+          </div>
+          <div class="row-sub muted">{{ c.invoiceCount }} Rechnungen</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Aufwand pro Kategorie{{ rankingScope }}</h2>
+        <p *ngIf="!data.current.categories.length" class="muted">Noch keine Ausgaben im Zeitraum.</p>
+        <div *ngFor="let cat of data.current.categories" class="ranked-row">
+          <div class="row-head">
+            <span class="row-name">{{ cat.category }}</span>
+            <span class="row-value">{{ fmt(cat.gross) }} €</span>
+          </div>
+          <div class="row-bar-track">
+            <div class="row-bar row-bar-expense" [style.width.%]="(cat.gross / categoryMax()) * 100"></div>
+          </div>
+          <div class="row-sub muted">{{ cat.count }} Belege · netto {{ fmt(cat.net) }} €</div>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</main>

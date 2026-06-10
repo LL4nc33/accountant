@@ -1,0 +1,19 @@
+.edit-page {
+  padding: 1rem 2rem;
+  max-width: 800px;
+
+  .hint {
+    color: var(--clr-color-neutral-700, #666);
+    margin-bottom: 1rem;
+  }
+
+  .readonly {
+    margin: 1rem 0;
+  }
+
+  .actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+}

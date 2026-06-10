@@ -1,0 +1,80 @@
+.hint {
+  color: var(--clr-color-neutral-700, #4A4A4A);
+  max-width: 720px;
+  margin-bottom: 1.5rem;
+}
+
+.export-card {
+  max-width: 540px;
+  padding: 1.5rem;
+  background: var(--clr-color-neutral-100, #FAFAFA);
+  border-left: 3px solid var(--clr-color-action-600, #2F2F2F);
+  border-radius: 2px;
+
+  .picker {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-family: system-ui, sans-serif;
+
+    label {
+      font-size: 0.85rem;
+      color: var(--clr-color-neutral-700, #4A4A4A);
+    }
+
+    select {
+      padding: 4px 8px;
+      border: 1px solid var(--clr-color-neutral-400, #CCC);
+      border-radius: 2px;
+      background: white;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+  }
+
+  .counts {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-family: system-ui, sans-serif;
+    font-size: 0.92rem;
+
+    strong { font-size: 1.4rem; color: var(--clr-color-neutral-900, #1A1A1A); }
+  }
+
+  .btn { font-size: 0.95rem; }
+
+  // Clarity btns haben max-width — beim langen Tax-Export-Label cliped der
+  // Text dann beidseitig. white-space:normal + auto-width fixt das.
+  .tax-download-btn {
+    max-width: none;
+    white-space: normal;
+    padding: 0.5rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.contents-hint {
+  margin-top: 1.5rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.88rem;
+
+  summary {
+    cursor: pointer;
+    color: var(--clr-color-action-600, #2F2F2F);
+  }
+
+  ul {
+    margin-top: 0.75rem;
+    padding-left: 1.2rem;
+    li { margin-bottom: 0.3rem; }
+  }
+
+  .muted {
+    color: var(--clr-color-neutral-600, #666);
+    margin-top: 0.75rem;
+  }
+}

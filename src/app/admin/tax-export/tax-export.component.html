@@ -1,0 +1,47 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Finanzamt-Jahres-Paket</h1>
+  </div>
+  <div class="page-head-actions"></div>
+</div>
+
+<main>
+  <p class="hint">
+    Ein-Klick-Export aller relevanten Daten eines Steuerjahres als ZIP.
+    Liefert Einnahmen-Ausgaben-Aufstellung + CSV-Listen aller Rechnungen
+    und Ausgaben.
+  </p>
+
+  <div class="export-card" *ngIf="!loading">
+    <div class="picker">
+      <label>Steuerjahr</label>
+      <select [(ngModel)]="selectedYear" name="year" (ngModelChange)="refreshCounts()">
+        <option *ngFor="let y of availableYears" [ngValue]="y">{{ y }}</option>
+      </select>
+    </div>
+
+    <div class="counts">
+      <div><strong>{{ invoiceCount }}</strong> Ausgangsrechnungen</div>
+      <div><strong>{{ expenseCount }}</strong> Eingangsrechnungen</div>
+    </div>
+
+    <button class="btn btn-primary tax-download-btn" (click)="download()">
+      <cds-icon shape="download"></cds-icon>
+      ZIP für {{ selectedYear }} herunterladen
+    </button>
+
+    <details class="contents-hint">
+      <summary>Was steckt drin?</summary>
+      <ul>
+        <li><strong>uebersicht.txt</strong> — Einnahmen + Ausgaben + Saldo + KU-Schwellwert-Check</li>
+        <li><strong>rechnungen.csv</strong> — Alle Ausgangsrechnungen des Jahres</li>
+        <li><strong>ausgaben.csv</strong> — Alle Eingangsrechnungen / Belege des Jahres</li>
+      </ul>
+      <p class="muted">
+        Hinweis: §132 BAO verlangt 7-jährige Aufbewahrung. Diese Aufstellung
+        ersetzt keine Steuerberatung — sie ist Vorbereitung für die
+        Jahressteuererklärung bzw. den Steuerberater.
+      </p>
+    </details>
+  </div>
+</main>

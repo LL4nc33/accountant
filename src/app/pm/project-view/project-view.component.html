@@ -1,0 +1,70 @@
+<div class="view-page" *ngIf="project">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>{{ project.name }}</h1>
+    </div>
+    <div class="page-head-actions">
+      <a class="btn btn-outline" [routerLink]="['/pm/project', project.id, 'edit']">Bearbeiten</a>
+      <a class="btn btn-outline" [routerLink]="['/pm/time-entry/new/edit']" [queryParams]="{projectId: project.id}">+ Stunden buchen</a>
+      <button class="btn btn-primary" type="button" (click)="openGenerateModal()" [disabled]="openEntries.length === 0">Rechnung erzeugen</button>
+    </div>
+  </div>
+
+  <dl class="meta">
+    <dt>Kunde</dt><dd>
+      <a *ngIf="customerLink" [routerLink]="customerLink">{{ customerName }}</a>
+      <span *ngIf="!customerLink">{{ customerName }}</span>
+    </dd>
+    <dt>Status</dt><dd>{{ project.status === 'active' ? 'Aktiv' : 'Geschlossen' }}</dd>
+    <dt>Stundensatz</dt><dd>{{ project.hourlyRate | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</dd>
+    <dt>Offene Stunden</dt><dd>{{ totalOpenHours | number:'1.1-2':'de-AT' }} h · {{ totalOpenAmount | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</dd>
+  </dl>
+
+  <p *ngIf="project.description">{{ project.description }}</p>
+
+  <h3>Zeitbuchungen</h3>
+  <clr-checkbox-wrapper>
+    <input type="checkbox" clrCheckbox [(ngModel)]="showOnlyOpen" name="showOnlyOpen" />
+    <label>Nur offene (unabgerechnete) anzeigen</label>
+  </clr-checkbox-wrapper>
+
+  <clr-datagrid>
+    <clr-dg-column>Datum</clr-dg-column>
+    <clr-dg-column>Stunden</clr-dg-column>
+    <clr-dg-column>Satz €/h</clr-dg-column>
+    <clr-dg-column>Betrag</clr-dg-column>
+    <clr-dg-column>Beschreibung</clr-dg-column>
+    <clr-dg-column>Status</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let e of filteredEntries">
+      <clr-dg-cell>{{ e.date | date:'dd.MM.yyyy' }}</clr-dg-cell>
+      <clr-dg-cell>{{ e.hours | number:'1.1-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell>{{ e.hourlyRate | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell>{{ e.amount | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell>{{ e.description }}</clr-dg-cell>
+      <clr-dg-cell>
+        <span *ngIf="e.billedInvoiceItemId" class="label label-info" style="font-size:.7rem">Abgerechnet</span>
+        <a *ngIf="!e.billedInvoiceItemId" [routerLink]="['/pm/time-entry', e.id, 'edit']" class="label" style="font-size:.7rem">Bearbeiten</a>
+      </clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>{{ filteredEntries.length }} Einträge</clr-dg-footer>
+  </clr-datagrid>
+</div>
+
+<clr-modal [(clrModalOpen)]="showGenerateModal" [clrModalClosable]="!generating">
+  <h3 class="modal-title">Rechnung aus Stunden erzeugen</h3>
+  <div class="modal-body">
+    <p>Folgende offene Zeitbuchungen werden in eine neue Rechnung umgewandelt:</p>
+    <dl class="summary">
+      <dt>Anzahl Einträge</dt><dd>{{ openEntries.length }}</dd>
+      <dt>Gesamtstunden</dt><dd>{{ totalOpenHours | number:'1.1-2':'de-AT' }} h</dd>
+      <dt>Netto-Summe</dt><dd>{{ totalOpenAmount | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</dd>
+    </dl>
+    <p class="hint">Pro Eintrag wird eine Rechnungsposition angelegt. Die Zeitbuchungen werden als „abgerechnet" markiert und können danach nicht mehr bearbeitet werden.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="showGenerateModal = false" [disabled]="generating">Abbrechen</button>
+    <button type="button" class="btn btn-primary" (click)="generateInvoice()" [disabled]="generating">{{ generating ? 'Erzeuge…' : 'Bestätigen' }}</button>
+  </div>
+</clr-modal>

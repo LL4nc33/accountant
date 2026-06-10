@@ -1,0 +1,140 @@
+<main class="svs">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>SVS-Vorschau</h1>
+      <p>
+        Sozialversicherungs-Forecast nach GSVG (KV/PV/UV/SV). Schützt vor dem
+        „Dritten-Jahr-Schock" durch die SVS-Nachbemessung.
+        <ng-container *ngIf="data">
+          Aktuell {{ data.yearsAsSelfEmployed }}. Jahr selbständig<ng-container *ngIf="data.svs.isVorlaeufig"> — vorläufige Vorschreibung</ng-container>.
+        </ng-container>
+      </p>
+    </div>
+    <div class="page-head-actions">
+      <select [(ngModel)]="selectedYear" (ngModelChange)="load()" class="year-picker">
+        <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">Lade SVS-Vorschau…</div>
+  <div *ngIf="error" class="error-box">{{ error }}</div>
+
+  <ng-container *ngIf="data && !loading">
+
+    <section class="kpi-grid">
+      <app-kpi-card
+        [label]="'SVS-Beitrag ' + data.year"
+        [value]="fmt(data.svs.total) + ' €'"
+        [subtitle]="'monatlich ~' + fmt(data.svs.total / 12) + ' €'"
+        [variant]="cappedVariant() === 'default' ? 'primary' : cappedVariant()"></app-kpi-card>
+      <app-kpi-card
+        label="Gewinn-Basis"
+        [value]="fmt(data.annualProfit) + ' €'"
+        [subtitle]="data.invoiceCount + ' Rechnungen · ' + data.expenseCount + ' Belege'"
+        variant="default"></app-kpi-card>
+      <app-kpi-card
+        label="Beitragsgrundlage"
+        [value]="fmt(data.svs.bgMonthly) + ' €/Mo'"
+        [subtitle]="bgCappedLabel(data.svs.capped)"
+        variant="neutral"></app-kpi-card>
+    </section>
+
+    <clr-alert clrAlertType="info" [clrAlertClosable]="false" *ngIf="data.svs.isVorlaeufig">
+      <clr-alert-item>
+        <span class="alert-text">
+          Im 1. und 2. Jahr schreibt die SVS Beiträge vorläufig auf die Mindest-Beitragsgrundlage vor.
+          Die endgültige Berechnung erfolgt rückwirkend, sobald der ESt-Bescheid vorliegt — meist im 3. Jahr.
+          <strong>Empfehlung: zusätzlich monatlich rückstellen für die spätere Nachbemessung.</strong>
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+
+    <clr-alert clrAlertType="warning" [clrAlertClosable]="false" *ngIf="data.svs.capped === 'max'">
+      <clr-alert-item>
+        <span class="alert-text">
+          Höchst-Beitragsgrundlage erreicht ({{ fmt(8085) }} €/Monat). Beiträge sind gedeckelt.
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+
+    <clr-alert clrAlertType="warning" [clrAlertClosable]="false" *ngIf="data.rueckstellung">
+      <clr-alert-item>
+        <span class="alert-text">
+          <strong>Rückstellungs-Empfehlung: ~{{ fmt(data.rueckstellung.expectedNachzahlung) }} €</strong> —
+          {{ data.rueckstellung.explanation }}
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+
+    <clr-alert clrAlertType="success" [clrAlertClosable]="false" *ngIf="data.versicherungsgrenze && data.versicherungsgrenze.eligible">
+      <clr-alert-item>
+        <span class="alert-text">
+          <strong>Kleinunternehmer-Versicherungsgrenze:</strong> {{ data.versicherungsgrenze.explanation }}
+          <a href="https://www.svs.at/cdscontent/?contentid=10007.846813" target="_blank" rel="noopener">
+            SVS-Antrag öffnen →
+          </a>
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+
+    <section class="card">
+      <h2>Aufschlüsselung</h2>
+      <table class="breakdown">
+        <thead>
+          <tr><th>Sparte</th><th>Satz</th><th class="num">monatlich</th><th class="num">jährlich</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Krankenversicherung</td>
+            <td>6,80 %</td>
+            <td class="num">{{ fmt(data.svs.kv / 12) }} €</td>
+            <td class="num">{{ fmt(data.svs.kv) }} €</td>
+          </tr>
+          <tr>
+            <td>Pensionsversicherung</td>
+            <td>18,50 %</td>
+            <td class="num">{{ fmt(data.svs.pv / 12) }} €</td>
+            <td class="num">{{ fmt(data.svs.pv) }} €</td>
+          </tr>
+          <tr>
+            <td>Unfallversicherung</td>
+            <td>fix</td>
+            <td class="num">{{ fmt(data.svs.uv / 12) }} €</td>
+            <td class="num">{{ fmt(data.svs.uv) }} €</td>
+          </tr>
+          <tr>
+            <td>Selbständigenvorsorge</td>
+            <td>1,53 %</td>
+            <td class="num">{{ fmt(data.svs.sv / 12) }} €</td>
+            <td class="num">{{ fmt(data.svs.sv) }} €</td>
+          </tr>
+          <tr class="total">
+            <td colspan="2">Summe</td>
+            <td class="num">{{ fmt(data.svs.total / 12) }} €</td>
+            <td class="num">{{ fmt(data.svs.total) }} €</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Quartalsraten</h2>
+      <p class="muted">Vorschreibung durch die SVS jeweils zum:</p>
+      <div class="quarters">
+        <div class="quarter" *ngFor="let q of data.quarters">
+          <div class="q-label">{{ q.label }} · {{ fmtDate(q.dueDate) }}</div>
+          <div class="q-amount">{{ fmt(q.amount) }} €</div>
+        </div>
+      </div>
+    </section>
+
+    <p class="muted footer-hint">
+      Schätzung nach Stand 2026-06 (Quelle: WKO/SVS). Verbindlich ist die Vorschreibung der SVS.
+      Gilt für GSVG (Gewerbetreibende + Neue Selbständige). FSVG-Freiberufler (Ärzte, Apotheker,
+      Patentanwälte) haben abweichende Sätze. Aktualisierungsfaktor 1,181 nicht berücksichtigt
+      (greift bei vorläufiger BGL ab Jahr 4).
+    </p>
+
+  </ng-container>
+</main>

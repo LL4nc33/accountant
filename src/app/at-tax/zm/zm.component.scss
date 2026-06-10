@@ -1,0 +1,88 @@
+.zm {
+  max-width: 960px;
+
+  .zm-head {
+    margin-bottom: 1rem;
+
+    h1 { font-size: 1.4rem; margin: 0 0 0.4rem; }
+    p.muted { margin: 0; color: var(--clr-color-neutral-600, #666); font-size: 0.9rem; max-width: 720px; }
+  }
+}
+
+.period-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--clr-color-neutral-300, #e0e0e0);
+  margin-bottom: 1rem;
+
+  label { display: flex; align-items: center; gap: 0.3rem; font-size: 0.92rem; cursor: pointer; }
+}
+
+.period-select {
+  padding: 4px 10px;
+  border: 1px solid #DDD;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.loading-state { color: var(--clr-color-neutral-600, #666); font-style: italic; }
+.error-box {
+  padding: 0.75rem 1rem;
+  background: var(--clr-color-danger-100, #fbeaea);
+  border-left: 3px solid var(--clr-color-danger-600, #c92100);
+  color: var(--clr-color-danger-700, #8b0000);
+  margin: 1rem 0;
+}
+
+.summary-line {
+  font-size: 0.95rem;
+  margin: 0.5rem 0 1rem;
+
+  strong { font-variant-numeric: tabular-nums; }
+}
+
+.alert-text { font-size: 0.92rem; line-height: 1.45; }
+.alert-text ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+
+.zm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  margin: 1rem 0;
+
+  th, td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--clr-color-neutral-200, #f0f0f0);
+    text-align: left;
+  }
+  th {
+    font-weight: 500;
+    background: var(--clr-color-neutral-100, #fafafa);
+    color: var(--clr-color-neutral-700, #4a4a4a);
+  }
+  .right { text-align: right; font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+  .small { font-size: 0.8rem; }
+  tr.total {
+    font-weight: 600;
+    border-top: 2px solid var(--clr-color-neutral-400, #ccc);
+    background: var(--clr-color-neutral-100, #fafafa);
+    td { padding-top: 0.7rem; }
+  }
+}
+
+.footer-hint {
+  margin-top: 2rem;
+  font-size: 0.78rem;
+  color: var(--clr-color-neutral-600, #666);
+  line-height: 1.45;
+  max-width: 720px;
+}
+
+.muted { color: var(--clr-color-neutral-600, #666); }

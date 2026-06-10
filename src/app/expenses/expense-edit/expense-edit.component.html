@@ -1,0 +1,106 @@
+<main *ngIf="entity">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>{{ isNew ? 'Neue Ausgabe' : 'Ausgabe bearbeiten' }}<span *ngIf="entity.archived" class="label" style="margin-left:0.75rem">Archiviert</span></h1>
+    </div>
+    <div class="page-head-actions">
+      <button class="btn btn-danger-outline" type="button" *ngIf="!isNew && entity.archived" (click)="hardDelete()">Endgültig löschen</button>
+      <button class="btn btn-outline" type="button" *ngIf="!isNew" (click)="toggleArchive()">
+        {{ entity.archived ? 'Reaktivieren' : 'Archivieren' }}
+      </button>
+      <a class="btn btn-outline" routerLink="/expenses">Abbrechen</a>
+      <button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+    </div>
+  </div>
+  <clr-alert *ngIf="entity.archived" clrAlertType="info" [clrAlertClosable]="false">
+    <clr-alert-item>
+      <span class="alert-text">
+        Diese Ausgabe ist archiviert. Sie erscheint nicht mehr in der Standard-Übersicht und in den Summen-Aggregationen.
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+
+  <section class="ocr-section" *ngIf="isNew">
+    <label class="ocr-drop">
+      <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" capture="environment"
+        (change)="onOcrFile($event)" [disabled]="ocrBusy" />
+      <span class="ocr-inner">
+        <cds-icon shape="camera" size="md"></cds-icon>
+        <span *ngIf="!ocrBusy">Beleg fotografieren oder Datei wählen</span>
+        <span *ngIf="ocrBusy">OCR läuft… (Vision-LLM analysiert)</span>
+        <small>Form-Felder werden automatisch vorausgefüllt — du prüfst und bestätigst.</small>
+      </span>
+    </label>
+    <div *ngIf="ocrError" class="ocr-error">{{ ocrError }}</div>
+  </section>
+
+  <form clrForm clrLayout="horizontal" (ngSubmit)="save()" class="expense-form">
+    <clr-date-container>
+      <label>Beleg-Datum</label>
+      <input type="date" clrDate name="date" [(clrDate)]="entity.date" />
+    </clr-date-container>
+
+    <clr-input-container>
+      <label>Lieferant</label>
+      <input clrInput name="vendor" [(ngModel)]="entity.vendor" required />
+      <clr-control-helper>Name des Rechnungsausstellers</clr-control-helper>
+    </clr-input-container>
+
+    <clr-input-container>
+      <label>Belegnummer</label>
+      <input clrInput name="reference" [(ngModel)]="entity.reference" />
+      <clr-control-helper>Optional. Wie auf dem Beleg gedruckt.</clr-control-helper>
+    </clr-input-container>
+
+    <div class="paperless-section">
+      <label>Beleg-Archiv (Paperless-ngx)</label>
+      <app-paperless-picker
+        [currentDocId]="entity.paperlessDocId"
+        (currentDocIdChange)="entity.paperlessDocId = $event"></app-paperless-picker>
+    </div>
+
+    <clr-select-container>
+      <label>Kategorie</label>
+      <select clrSelect name="category" [(ngModel)]="entity.category">
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
+    </clr-select-container>
+
+    <clr-textarea-container>
+      <label>Beschreibung</label>
+      <textarea clrTextarea name="description" [(ngModel)]="entity.description" rows="2"></textarea>
+    </clr-textarea-container>
+
+    <div class="totals-row">
+      <clr-number-input-container>
+        <label>Netto (€)</label>
+        <input clrNumberInput type="number" step="0.01" name="netTotal" [(ngModel)]="entity.netTotal" (ngModelChange)="recalcGross()" />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label>USt-Satz (%)</label>
+        <input clrNumberInput type="number" step="0.5" name="vatRate" [(ngModel)]="entity.vatRate" (ngModelChange)="recalcGross()" />
+      </clr-number-input-container>
+
+      <clr-number-input-container>
+        <label>Brutto (€)</label>
+        <input clrNumberInput type="number" step="0.01" name="grossTotal" [(ngModel)]="entity.grossTotal" (ngModelChange)="recalcNet()" />
+        <clr-control-helper>Brutto und Netto sind direkt gekoppelt — Änderung an einem rechnet das andere neu.</clr-control-helper>
+      </clr-number-input-container>
+    </div>
+
+    <clr-select-container>
+      <label>Zahlungsstatus</label>
+      <select clrSelect name="paymentStatus" [(ngModel)]="entity.paymentStatus">
+        <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+      </select>
+    </clr-select-container>
+
+    <clr-date-container *ngIf="entity.paymentStatus === 'bezahlt'">
+      <label>Bezahlt am</label>
+      <input type="date" clrDate name="paidAt" [(clrDate)]="entity.paidAt" />
+    </clr-date-container>
+
+    <button type="submit" hidden></button>
+  </form>
+</main>

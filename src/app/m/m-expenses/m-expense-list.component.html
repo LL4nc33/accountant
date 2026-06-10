@@ -1,0 +1,39 @@
+<div class="m-list-toolbar">
+  <input type="search" [(ngModel)]="search" placeholder="Suchen…" class="m-search" />
+  <div class="m-pills">
+    <select [(ngModel)]="year" (ngModelChange)="reload()" class="m-pill-select">
+      <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+    </select>
+    <select [(ngModel)]="month" (ngModelChange)="reload()" class="m-pill-select">
+      <option *ngFor="let m of months" [ngValue]="m.value">{{ m.label }}</option>
+    </select>
+    <button class="m-pill" [class.active]="showArchived" (click)="showArchived = !showArchived; reload()">Archiv</button>
+    <a class="m-pill m-pill-add" routerLink="/m/expense/new/edit">+ Neue Ausgabe</a>
+  </div>
+</div>
+
+<div class="m-expense-totals" *ngIf="!loading && filtered.length > 0">
+  <div><span class="m-tk">Netto</span> {{ totalNet | number:'1.2-2':'de-AT' }} €</div>
+  <div><span class="m-tk">Brutto</span> {{ totalGross | number:'1.2-2':'de-AT' }} €</div>
+</div>
+
+<p *ngIf="loading" class="m-muted">Lädt …</p>
+<p *ngIf="!loading && filtered.length === 0" class="m-muted">
+  <span *ngIf="!search">Keine Ausgaben in diesem Zeitraum.</span>
+  <span *ngIf="search">Kein Treffer für „{{ search }}".</span>
+</p>
+
+<m-card *ngFor="let e of filtered" [link]="['/m/expense', e.id, 'edit']">
+  <div card-head>
+    <span>{{ e.vendor || '—' }}</span>
+    <span>{{ e.grossTotal | number:'1.2-2':'de-AT' }} €</span>
+  </div>
+  <div card-body>
+    <span>{{ e.date | date:'dd.MM.yyyy' }} · {{ e.category }}</span>
+    <span *ngIf="e.reference">{{ e.reference }}</span>
+  </div>
+  <div card-status>
+    <span class="m-badge" [class.m-badge-success]="e.paymentStatus === 'bezahlt'">{{ e.paymentStatus === 'bezahlt' ? 'Bezahlt' : 'Offen' }}</span>
+    <span *ngIf="e.archived" class="m-badge m-badge-warning">Archiviert</span>
+  </div>
+</m-card>

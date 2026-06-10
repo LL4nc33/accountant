@@ -1,0 +1,82 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>BMD / RZL — Steuerberater-Export</h1>
+  </div>
+  <div class="page-head-actions"></div>
+</div>
+
+<main>
+  <p class="hint">
+    Generiert ein CSV-Paket mit allen Buchungssätzen für deinen
+    Steuerberater. Format ist BMD/RZL-kompatibel (Semikolon-getrennt,
+    deutsche Header, Komma als Dezimaltrenner).
+  </p>
+
+  <section class="picker">
+    <div class="picker-row">
+      <label>Zeitraum</label>
+      <div class="mode-toggle">
+        <button [class.active]="mode === 'month'" (click)="mode = 'month'">Monat</button>
+        <button [class.active]="mode === 'quarter'" (click)="mode = 'quarter'">Quartal</button>
+        <button [class.active]="mode === 'year'" (click)="mode = 'year'">Jahr</button>
+      </div>
+    </div>
+    <div class="picker-row">
+      <select *ngIf="mode === 'month'" [(ngModel)]="month">
+        <option *ngFor="let m of months" [ngValue]="m.v">{{ m.l }}</option>
+      </select>
+      <select *ngIf="mode === 'quarter'" [(ngModel)]="quarter">
+        <option *ngFor="let q of quarters" [ngValue]="q">{{ q }}. Quartal</option>
+      </select>
+      <select [(ngModel)]="year">
+        <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+      </select>
+    </div>
+  </section>
+
+  <button class="btn btn-primary bmd-download-btn" (click)="download()" [disabled]="loading">
+    <cds-icon shape="download"></cds-icon>
+    BMD-ZIP für {{ periodLabel() }} herunterladen
+  </button>
+
+  <section class="contents-card">
+    <h2>Was steckt drin?</h2>
+    <ul>
+      <li><strong>umsaetze.csv</strong> — Ausgangsrechnungen (eine Zeile pro Buchungssatz: Netto + USt getrennt)</li>
+      <li><strong>vorsteuer.csv</strong> — Eingangsrechnungen (Aufwand + Vorsteuer getrennt)</li>
+      <li><strong>README.txt</strong> — Format-Beschreibung, Konto-Mapping, Buchungs-Logik</li>
+    </ul>
+  </section>
+
+  <section class="konten-card" *ngIf="settings">
+    <h2>Kontorahmen (editierbar)</h2>
+    <p class="muted">
+      Stimme die Kontonummern mit deinem Steuerberater ab — anpassen unter
+      <a routerLink="/settings/company">Firmen-Einstellungen</a>.
+    </p>
+    <table class="konten-table">
+      <tbody>
+        <tr><td>Forderungen</td><td class="konto">{{ settings.kontoForderungen }}</td></tr>
+        <tr><td>Verbindlichkeiten</td><td class="konto">{{ settings.kontoVerbindlichkeiten }}</td></tr>
+        <tr><td>Erlöse 20%</td><td class="konto">{{ settings.kontoErloese20 }}</td></tr>
+        <tr><td>Erlöse 10%</td><td class="konto">{{ settings.kontoErloese10 }}</td></tr>
+        <tr><td>Erlöse 13%</td><td class="konto">{{ settings.kontoErloese13 }}</td></tr>
+        <tr><td>Erlöse 0% / steuerfrei</td><td class="konto">{{ settings.kontoErloese0 }}</td></tr>
+        <tr><td>Erlöse Reverse-Charge EU</td><td class="konto">{{ settings.kontoErloeseRC }}</td></tr>
+        <tr><td>Erlöse Drittland</td><td class="konto">{{ settings.kontoErloeseDrittland }}</td></tr>
+        <tr><td>USt 20%</td><td class="konto">{{ settings.kontoUst20 }}</td></tr>
+        <tr><td>USt 10%</td><td class="konto">{{ settings.kontoUst10 }}</td></tr>
+        <tr><td>USt 13%</td><td class="konto">{{ settings.kontoUst13 }}</td></tr>
+        <tr><td>Vorsteuer</td><td class="konto">{{ settings.kontoVorsteuer }}</td></tr>
+        <tr><td>Aufwand-Sammel</td><td class="konto">{{ settings.kontoAufwand }}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <p class="muted compliance-note">
+    Hinweis: §132 BAO verlangt 7 Jahre Aufbewahrung — exportiere zusätzlich
+    die Original-Rechnungs-PDFs (Finanzamt-Jahres-Paket). Bei abweichendem
+    Kontorahmen passe die Felder in den Firmen-Einstellungen an, dann erneut
+    exportieren.
+  </p>
+</main>

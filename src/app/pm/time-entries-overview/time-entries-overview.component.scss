@@ -1,0 +1,10 @@
+clr-checkbox-wrapper {
+  margin: 0.5rem 0 1rem;
+}
+
+:host ::ng-deep .dg-right,
+:host ::ng-deep clr-dg-cell.dg-right,
+:host ::ng-deep clr-dg-column.dg-right .datagrid-column-title {
+  text-align: right;
+  justify-content: flex-end;
+}

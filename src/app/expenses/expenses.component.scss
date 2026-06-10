@@ -1,0 +1,81 @@
+.hint {
+  color: var(--clr-color-neutral-700, #4A4A4A);
+  margin-bottom: 1rem;
+  max-width: 720px;
+}
+
+.period-bar {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.92rem;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  select {
+    padding: 4px 8px;
+    border: 1px solid var(--clr-color-neutral-400, #CCC);
+    border-radius: 2px;
+    background: white;
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  .muted {
+    margin-left: auto;
+    color: var(--clr-color-neutral-600, #666);
+  }
+}
+
+.totals {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: var(--clr-color-neutral-100, #FAFAFA);
+  border-left: 3px solid var(--clr-color-action-600, #2F2F2F);
+  font-family: system-ui, sans-serif;
+
+  .total {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    .label {
+      font-size: 0.72rem;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--clr-color-neutral-600, #666);
+    }
+    .value {
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--clr-color-neutral-900, #1A1A1A);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+  .total-emph .value {
+    font-size: 1.8rem;
+  }
+}
+
+:host ::ng-deep .dg-right,
+:host ::ng-deep clr-dg-cell.dg-right,
+:host ::ng-deep clr-dg-column.dg-right .datagrid-column-title {
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.85rem;
+  margin: 0.5rem 0 1.25rem;
+  max-width: 1200px;
+}

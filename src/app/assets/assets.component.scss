@@ -1,0 +1,71 @@
+.assets { max-width: 1080px; }
+
+.checkbox-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  color: var(--clr-color-neutral-700, #4a4a4a);
+  cursor: pointer;
+}
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+
+  .kpi {
+    background: white;
+    border: 1px solid var(--clr-color-neutral-300, #e0e0e0);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+  }
+  .kpi-label { font-size: 0.82rem; color: var(--clr-color-neutral-700, #4a4a4a); }
+  .kpi-value { font-size: 1.35rem; font-weight: 600; margin-top: 0.3rem; font-variant-numeric: tabular-nums; }
+}
+
+.asset-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  background: white;
+  border: 1px solid var(--clr-color-neutral-300, #e0e0e0);
+  border-radius: 4px;
+  overflow: hidden;
+
+  th, td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--clr-color-neutral-200, #f0f0f0);
+    text-align: left;
+  }
+  th { font-weight: 500; background: var(--clr-color-neutral-100, #fafafa); color: var(--clr-color-neutral-700, #4a4a4a); }
+  .right { text-align: right; font-variant-numeric: tabular-nums; }
+
+  tr.archived { opacity: 0.5; }
+  tr.fully-depreciated td:nth-child(7) { color: var(--clr-color-success-700, #266100); }
+
+  .badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    &.gwg { background: var(--clr-color-warning-100, #fcecbc); color: var(--clr-color-warning-800, #7d5100); }
+  }
+  .link { color: var(--clr-color-action-700, #1c4d7c); text-decoration: none; font-size: 0.85rem; }
+  .link:hover { text-decoration: underline; }
+}
+
+.footer-hint {
+  margin-top: 2rem;
+  font-size: 0.78rem;
+  color: var(--clr-color-neutral-600, #666);
+  line-height: 1.45;
+  max-width: 720px;
+}
+.muted { color: var(--clr-color-neutral-600, #666); }

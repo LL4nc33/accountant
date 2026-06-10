@@ -1,0 +1,117 @@
+.hint {
+  color: var(--clr-color-neutral-700, #4a4a4a);
+  max-width: 720px;
+  margin-bottom: 1.5rem;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-family: system-ui, sans-serif;
+
+  .picker-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  label {
+    font-size: 0.85rem;
+    color: var(--clr-color-neutral-700, #4a4a4a);
+    min-width: 70px;
+  }
+  .mode-toggle {
+    display: inline-flex;
+    border: 1px solid var(--clr-color-neutral-400, #ccc);
+    border-radius: 2px;
+    overflow: hidden;
+
+    button {
+      background: white;
+      border: none;
+      padding: 4px 12px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      cursor: pointer;
+      color: var(--clr-color-neutral-700, #4a4a4a);
+
+      &.active {
+        background: var(--clr-color-action-600, #2f2f2f);
+        color: white;
+      }
+      &:not(.active):hover { background: var(--clr-color-neutral-200, #eee); }
+    }
+    button + button { border-left: 1px solid var(--clr-color-neutral-400, #ccc); }
+  }
+  select {
+    padding: 4px 8px;
+    border: 1px solid var(--clr-color-neutral-400, #ccc);
+    border-radius: 2px;
+    background: white;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+}
+
+.bmd-download-btn {
+  max-width: none;
+  white-space: normal;
+  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.contents-card, .konten-card {
+  max-width: 720px;
+  padding: 1rem 1.25rem;
+  background: var(--clr-color-neutral-100, #fafafa);
+  border-left: 3px solid var(--clr-color-action-600, #2f2f2f);
+  border-radius: 2px;
+  margin-bottom: 1.5rem;
+  font-family: system-ui, sans-serif;
+
+  h2 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    color: var(--clr-color-neutral-900, #1a1a1a);
+  }
+  ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.92rem;
+    li { margin-bottom: 0.3rem; }
+  }
+  .muted {
+    color: var(--clr-color-neutral-600, #666);
+    font-size: 0.88rem;
+    margin: 0 0 1rem;
+  }
+}
+
+.konten-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  td {
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--clr-color-neutral-300, #e0e0e0);
+  }
+  td.konto {
+    font-family: 'Source Code Pro', ui-monospace, monospace;
+    font-weight: 600;
+    color: var(--clr-color-action-600, #2f2f2f);
+    text-align: right;
+    width: 80px;
+  }
+}
+
+.compliance-note {
+  color: var(--clr-color-neutral-600, #666);
+  font-size: 0.85rem;
+  max-width: 720px;
+  margin-top: 1rem;
+}

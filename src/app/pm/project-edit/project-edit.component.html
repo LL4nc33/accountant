@@ -1,0 +1,59 @@
+<main class="edit-page" *ngIf="entity">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>{{ isNew ? 'Neues Projekt' : 'Projekt bearbeiten' }}<span *ngIf="entity.archived" class="label" style="margin-left:0.75rem;font-size:.7rem">Archiviert</span></h1>
+    </div>
+    <div class="page-head-actions">
+      <button class="btn btn-danger-outline" type="button" *ngIf="!isNew && entity.archived" (click)="deleteProject()">Endgültig löschen</button>
+      <button class="btn btn-outline" type="button" *ngIf="!isNew" (click)="toggleArchive()">
+        {{ entity.archived ? 'Reaktivieren' : 'Archivieren' }}
+      </button>
+      <a class="btn btn-outline" routerLink="/pm/overview">Abbrechen</a>
+      <button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+    </div>
+  </div>
+
+  <clr-alert *ngIf="entity.archived" clrAlertType="info" [clrAlertClosable]="false">
+    <clr-alert-item>
+      <span class="alert-text">
+        Dieses Projekt ist archiviert. Es erscheint nicht mehr in der Standard-Übersicht; bestehende Zeitbuchungen + Rechnungen bleiben unverändert.
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+
+  <form clrForm clrLayout="horizontal" (ngSubmit)="save()">
+    <clr-select-container>
+      <label>Kunde</label>
+      <select clrSelect name="customer" [(ngModel)]="entity.customerId">
+        <option [ngValue]="''">— wählen —</option>
+        <option *ngFor="let c of customers" [value]="c.id">{{ c.label }}</option>
+      </select>
+    </clr-select-container>
+
+    <clr-input-container>
+      <label>Projektname</label>
+      <input clrInput name="name" [(ngModel)]="entity.name" />
+    </clr-input-container>
+
+    <clr-textarea-container>
+      <label>Beschreibung</label>
+      <textarea clrTextarea name="description" [(ngModel)]="entity.description" rows="4"></textarea>
+    </clr-textarea-container>
+
+    <clr-select-container>
+      <label>Status</label>
+      <select clrSelect name="status" [(ngModel)]="entity.status">
+        <option value="active">Aktiv</option>
+        <option value="closed">Geschlossen</option>
+      </select>
+    </clr-select-container>
+
+    <clr-number-input-container>
+      <label>Stundensatz (€)</label>
+      <input clrNumberInput type="number" step="0.01" name="hourlyRate" [(ngModel)]="entity.hourlyRate" />
+      <clr-control-helper>0 = Fallback auf CompanySettings.defaultHourlyRate</clr-control-helper>
+    </clr-number-input-container>
+
+    <button type="submit" hidden></button>
+  </form>
+</main>

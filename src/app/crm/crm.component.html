@@ -1,0 +1,90 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>{{ 'customerOverview' | translate }}</h1>
+  </div>
+  <div class="page-head-actions">
+    <clr-checkbox-wrapper>
+      <input type="checkbox" clrCheckbox name="showArchivedCustomers"
+             [(ngModel)]="showArchived" (ngModelChange)="reload()" />
+      <label>Archivierte anzeigen</label>
+    </clr-checkbox-wrapper>
+    <clr-dropdown>
+      <button class="btn btn-primary" clrDropdownTrigger>
+        <cds-icon shape="angle" direction="down"></cds-icon>{{ 'addCustomer' | translate }}
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+        <div *ngIf="featureFlags.enablePersonCreation"
+          aria-label="Person"
+          clrDropdownItem
+          style="font-size: 20px"
+          cds-layout="p-y:xs"
+          [routerLink]="['/crm/person', 'new', 'edit']"
+        >
+          <cds-icon size="md" shape="id-badge"></cds-icon>{{ 'person' | translate }}
+        </div>
+        <div *ngIf="featureFlags.enableCompanyCreation"
+          aria-label="Firma"
+          clrDropdownItem
+          style="font-size: 20px"
+          cds-layout="p-y:xs"
+          [routerLink]="['/crm/company', 'new', 'edit']"
+        >
+          <cds-icon size="md" shape="building"></cds-icon>{{ 'company' | translate }}
+        </div>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+  </div>
+</div>
+
+<main>
+  <clr-spinner *ngIf="loading">Lädt…</clr-spinner>
+
+  <app-empty-state
+    *ngIf="!loading && (!customers || customers.length === 0)"
+    icon="user"
+    title="Noch keine Kunden"
+    text="Lege eine Person oder ein Unternehmen an, bevor du Rechnungen schreibst."
+    ctaLabel="+ Neuer Kunde"
+    [ctaRouterLink]="['/crm/person/new/edit']"
+  ></app-empty-state>
+
+  <clr-datagrid *ngIf="!loading && customers && customers.length > 0">
+    <clr-dg-column *ngIf="featureFlags.showIdColumn" style="width: 20px">{{ 'id' | translate }}</clr-dg-column>
+    <clr-dg-column *ngIf="featureFlags.showCustomerNumberColumn" style="width: 110px" [clrDgField]="'customerNumber'">{{ 'customerNumber' | translate }}</clr-dg-column>
+    <clr-dg-column *ngIf="featureFlags.showTypeColumn" style="width: 90px" [clrDgField]="'customerType'">{{ 'type' | translate }}</clr-dg-column>
+    <clr-dg-column *ngIf="featureFlags.showNameColumn" [clrDgField]="'displayName'">{{ 'name' | translate }}</clr-dg-column>
+    <clr-dg-column *ngIf="featureFlags.showEmailColumn" [clrDgField]="'email'">{{ 'email' | translate }}</clr-dg-column>
+    <clr-dg-column *ngIf="featureFlags.showCreatedAtColumn" style="width: 200px" [clrDgField]="'createdAt'" [(clrDgSortOrder)]="sortOrder">{{ 'createdAt' | translate }}</clr-dg-column>
+    <clr-dg-column *ngIf="featureFlags.showUpdatedAtColumn" style="width: 200px" [clrDgField]="'updatedAt'">{{ 'updatedAt' | translate }}</clr-dg-column>
+    <clr-dg-row
+      *clrDgItems="let customer of customers"
+      [clrDgItem]="customer"
+      (click)="openCustomer(customer)"
+    >
+      <clr-dg-cell *ngIf="featureFlags.showIdColumn" style="width: 20px">
+        <clr-tooltip>
+          <cds-icon
+            clrTooltipTrigger
+            [attr.shape]="customer.customerType === 'Person' ? 'id-badge' : 'building'"
+            size="18"
+            (click)="copyCustomerId(customer.id)"
+          ></cds-icon>
+          <clr-tooltip-content [clrSize]="'md'">
+            {{ customer.id }}
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </clr-dg-cell>
+      <clr-dg-cell *ngIf="featureFlags.showCustomerNumberColumn">{{ customer.customerNumber || '—' }}</clr-dg-cell>
+      <clr-dg-cell *ngIf="featureFlags.showTypeColumn">{{ customer.customerType.toLowerCase() | translate }}</clr-dg-cell>
+      <clr-dg-cell *ngIf="featureFlags.showNameColumn">
+        {{ customer.displayName }}
+        <span *ngIf="customer.archived" class="label" style="margin-left:.5rem;font-size:.7rem">Archiviert</span>
+      </clr-dg-cell>
+      <clr-dg-cell *ngIf="featureFlags.showEmailColumn">{{ customer.email || '' }}</clr-dg-cell>
+      <clr-dg-cell *ngIf="featureFlags.showCreatedAtColumn">{{ customer.createdAt | date : 'dd.MM.yyyy' }}</clr-dg-cell>
+      <clr-dg-cell *ngIf="featureFlags.showUpdatedAtColumn">{{ customer.updatedAt | date : 'dd.MM.yyyy' }}</clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>{{ customers.length }} {{ 'customers' | translate }}</clr-dg-footer>
+  </clr-datagrid>
+</main>

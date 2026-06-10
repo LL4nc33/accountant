@@ -1,0 +1,135 @@
+<main class="est">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>ESt-Vorschau</h1>
+      <p>Einkommensteuer-Forecast nach AT-Tarif 2026 mit Gewinnfreibetrag §10 EStG. Verkettet sich mit der SVS-Vorschau (SVS als Betriebsausgabe).</p>
+    </div>
+    <div class="page-head-actions">
+      <label class="invest-toggle">
+        <input type="checkbox" [(ngModel)]="applyInvestGfb" (ngModelChange)="load()" [disabled]="loading" />
+        <span>Gewinnfreibetrag</span>
+      </label>
+      <select [(ngModel)]="selectedYear" (ngModelChange)="load()" class="year-picker">
+        <option *ngFor="let y of years" [ngValue]="y">{{ y }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">Lade ESt-Vorschau…</div>
+  <div *ngIf="error" class="error-box">{{ error }}</div>
+
+  <ng-container *ngIf="data && !loading">
+
+    <section class="kpi-grid">
+      <app-kpi-card
+        [label]="'Einkommensteuer ' + data.year"
+        [value]="fmt(data.est.est) + ' €'"
+        [subtitle]="'Grenzsteuersatz ' + fmtPct(data.est.marginalRate)"
+        variant="primary"></app-kpi-card>
+      <app-kpi-card
+        label="Gewinn-Basis"
+        [value]="fmt(data.annualProfit) + ' €'"
+        [subtitle]="data.invoiceCount + ' Rg · ' + data.expenseCount + ' Belege'"
+        variant="default"></app-kpi-card>
+      <app-kpi-card
+        label="zu versteuerndes Einkommen"
+        [value]="fmt(data.est.taxableIncome) + ' €'"
+        [subtitle]="'Durchschnittssatz ' + fmtPct(data.est.effectiveRate)"
+        variant="neutral"></app-kpi-card>
+    </section>
+
+    <clr-alert clrAlertType="info" [clrAlertClosable]="false" *ngIf="data.svsCoupled">
+      <clr-alert-item>
+        <span class="alert-text">
+          SVS-Beiträge ({{ fmt(data.est.svsAnnual) }} €) sind als Betriebsausgabe abgezogen
+          (§4 Abs. 4 EStG). Bemessungsgrundlage = Gewinn − SVS.
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+
+    <clr-alert clrAlertType="warning" [clrAlertClosable]="false" *ngIf="!data.svsCoupled">
+      <clr-alert-item>
+        <span class="alert-text">
+          Modul „SVS-Vorschau" nicht aktiv — die ESt wird ohne SVS-Abzug berechnet
+          und ist damit überzeichnet. Aktiviere SVS unter Einstellungen → Module für
+          eine realistische Forecast.
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+
+    <clr-alert clrAlertType="success" [clrAlertClosable]="false" *ngIf="data.applyInvestitionsbedingtGfb">
+      <clr-alert-item>
+        <span class="alert-text">
+          <strong>Investitionsbedingter GFB einbezogen:</strong>
+          {{ fmt(data.est.gewinnfreibetrag.investitionsbedingt) }} € zusätzlich.
+          Voraussetzung: Investition in begünstigte Wirtschaftsgüter (≥ 4 Jahre Nutzungsdauer)
+          oder Wertpapiere nach §14 Abs. 7 Z 4 EStG.
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+
+    <section class="card">
+      <h2>Berechnungs-Kaskade</h2>
+      <table class="cascade">
+        <tr>
+          <td>Gewinn aus selbständiger Tätigkeit</td>
+          <td class="num">{{ fmt(data.est.profit) }} €</td>
+        </tr>
+        <tr *ngIf="data.svsCoupled">
+          <td class="indent">− SVS-Beiträge (Betriebsausgabe)</td>
+          <td class="num">−{{ fmt(data.est.svsAnnual) }} €</td>
+        </tr>
+        <tr class="subtotal">
+          <td>Bemessungsgrundlage</td>
+          <td class="num">{{ fmt(data.est.bemessungsgrundlage) }} €</td>
+        </tr>
+        <tr>
+          <td class="indent">− Grundfreibetrag (§10 EStG, 15 % bis 33k)</td>
+          <td class="num">−{{ fmt(data.est.gewinnfreibetrag.grund) }} €</td>
+        </tr>
+        <tr *ngIf="data.applyInvestitionsbedingtGfb">
+          <td class="indent">− investitionsbedingter GFB (gestaffelt)</td>
+          <td class="num">−{{ fmt(data.est.gewinnfreibetrag.investitionsbedingt) }} €</td>
+        </tr>
+        <tr class="total">
+          <td>zu versteuerndes Einkommen</td>
+          <td class="num">{{ fmt(data.est.taxableIncome) }} €</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="card" *ngIf="data.est.bracketBreakdown.length">
+      <h2>Tarifstufen-Aufschlüsselung</h2>
+      <table class="brackets">
+        <thead>
+          <tr>
+            <th>Stufe</th>
+            <th>Satz</th>
+            <th class="num">Anteil in Stufe</th>
+            <th class="num">Steuer in Stufe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of data.est.bracketBreakdown">
+            <td>{{ bracketLabel(b.from, b.to) }}</td>
+            <td>{{ fmtPct(b.rate) }}</td>
+            <td class="num">{{ fmt(b.amountInBracket) }} €</td>
+            <td class="num">{{ fmt(b.taxOnBracket) }} €</td>
+          </tr>
+          <tr class="total">
+            <td colspan="3">Summe Einkommensteuer</td>
+            <td class="num">{{ fmt(data.est.est) }} €</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p class="muted footer-hint">
+      Tarif nach Inflationsanpassungsverordnung 2026 (BGBl. II Nr. 191/2025). Pauschalierungen
+      (§17 Basispauschale 15 %, KU-Pauschalierung 45 %/20 %) sind nicht berücksichtigt — gilt
+      nur für vollständige Gewinnermittlung. Verlustvortrag (§18 Abs. 6 EStG) ebenfalls nicht
+      einbezogen. Verbindlich ist der ESt-Bescheid des Finanzamts.
+    </p>
+
+  </ng-container>
+</main>

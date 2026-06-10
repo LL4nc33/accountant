@@ -1,0 +1,43 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Produkte</h1>
+  </div>
+  <div class="page-head-actions">
+    <clr-checkbox-wrapper>
+      <input type="checkbox" clrCheckbox name="showArchivedProd"
+             [(ngModel)]="showArchived" (ngModelChange)="reload()" />
+      <label>Archivierte anzeigen</label>
+    </clr-checkbox-wrapper>
+    <a class="btn btn-primary" routerLink="/products/new/edit">+ Neues Produkt</a>
+  </div>
+</div>
+
+<main>
+  <app-empty-state
+    *ngIf="!loading && rows.length === 0"
+    icon="library"
+    title="Noch keine Produkte"
+    text='Lege wiederkehrende Rechnungs-Positionen als Produkt an (z.B. „Beratungsstunde", „Wartung pro Monat") — beim Rechnungs-Schreiben kannst du sie dann per Klick auswählen statt jedes Mal neu zu tippen.'
+    ctaLabel="+ Neues Produkt"
+    [ctaRouterLink]="['/products/new/edit']"
+  ></app-empty-state>
+
+  <clr-datagrid *ngIf="loading || rows.length > 0" [clrDgLoading]="loading">
+    <clr-dg-column [clrDgField]="'name'">Name</clr-dg-column>
+    <clr-dg-column style="width: 100px">Einheit</clr-dg-column>
+    <clr-dg-column style="width: 150px" class="dg-right">Standard-Preis</clr-dg-column>
+    <clr-dg-column style="width: 100px" class="dg-right">USt-Satz</clr-dg-column>
+
+    <clr-dg-row *clrDgItems="let row of rows" (click)="open(row)">
+      <clr-dg-cell>
+        <a [routerLink]="['/products', row.id, 'edit']">{{ row.name }}</a>
+        <span *ngIf="row.archived" class="label" style="margin-left:.5rem;font-size:.7rem">Archiviert</span>
+      </clr-dg-cell>
+      <clr-dg-cell>{{ row.unit || '—' }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.defaultPrice | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ row.defaultVat }} %</clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer>{{ rows.length }} Produkte</clr-dg-footer>
+  </clr-datagrid>
+</main>

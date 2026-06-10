@@ -1,0 +1,105 @@
+<app-edit-shell title="Module" subtitle="Nur das aktivieren was du nutzt — die Sidebar zeigt entsprechend nur die aktiven Bereiche. Daten bleiben beim Deaktivieren erhalten und werden nach Reaktivierung sofort wieder sichtbar." [showSave]="true" [saving]="saving" (save)="save()" *ngIf="settings">
+
+  <ng-template editTab="Kern-Module">
+    <form clrForm clrLayout="horizontal" (ngSubmit)="save()" class="modules-form">
+      <clr-toggle-container>
+        <label>Projekte + Zeiterfassung</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleProjects" [(ngModel)]="settings.moduleProjects" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Projekt-Verwaltung mit Stundenerfassung und „Aus Stunden → Rechnung"-Generator.</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>Produkt-Katalog</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleProducts" [(ngModel)]="settings.moduleProducts" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Wiederkehrende Rechnungs-Positionen aus Katalog vorbefüllen statt eintippen.</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>Ausgaben / Eingangsrechnungen</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleExpenses" [(ngModel)]="settings.moduleExpenses" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Eingangsrechnungen + Belege erfassen, Monats-/Jahres-Filter, Basis für Einnahmen-Ausgaben-Rechnung.</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>Arbeitszeit-Aggregation</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleWorkHours" [(ngModel)]="settings.moduleWorkHours" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Monats-/Jahres-Aggregation eigener Arbeitszeit aus den TimeEntries — zeigt einen „Arbeitszeit"-Eintrag in der Projekte-Gruppe.</clr-control-helper>
+      </clr-toggle-container>    </form>
+  </ng-template>
+
+  <ng-template editTab="Admin + Automation">
+    <form clrForm clrLayout="horizontal" (ngSubmit)="save()" class="modules-form">
+      <clr-toggle-container>
+        <label>Finanzamt-Jahres-Export</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleTaxExport" [(ngModel)]="settings.moduleTaxExport" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Ein-Klick-Paket pro Jahr: Einnahmen, Ausgaben, Saldo als ZIP mit CSV-Listen. Erreichbar im Cog-Dropdown → „Finanzamt-Export".</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>KI-Assistent (lokal, OpenAI-kompatibel)</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleLlm" [(ngModel)]="settings.moduleLlm" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Chat-Assistent mit Read- und Write-Tools (Vorschläge mit Confirm). Spricht jede OpenAI-kompatible API (llama.cpp, Ollama, LM Studio, vLLM, Hosted). Konfiguration unter Firma → „KI-Assistent".</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>Mahnwesen (3 Stufen + Verzugszinsen)</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleReminder" [(ngModel)]="settings.moduleReminder" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Mahnungen erzeugen mit Verzugszinsen (§456 UGB B2B / §1000 ABGB B2C) und Mahnspesen (§1333 ABGB). PDF + SMTP-Versand wie Rechnungen. Defaults konfigurierbar unter Firma → „Mahnwesen".</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>SVS-Vorschau (AT, GSVG)</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleSvs" [(ngModel)]="settings.moduleSvs" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Jahresprognose deiner AT-Sozialversicherungsbeiträge (KV/PV/UV/SV) auf Basis der laufenden Rechnungen+Belege. Schützt vor dem „dritten-Jahr-Schock" durch die SVS-Nachbemessung. Geschäftsstart-Jahr unter Firma → „SVS-Vorschau".</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>ESt-Vorschau (AT)</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleEst" [(ngModel)]="settings.moduleEst" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Einkommensteuer-Forecast nach AT-Tarif 2026 mit Gewinnfreibetrag §10 EStG. Verkettet sich mit der SVS-Vorschau (SVS als Betriebsausgabe). Tarif final per Inflationsanpassungsverordnung 2026.</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>Anlagenverzeichnis / AfA</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleAssets" [(ngModel)]="settings.moduleAssets" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Anlagenverzeichnis mit linearer AfA (§7 EStG), Halbjahresregel + GWG-Auto-Detect (≤ 1.000 € Sofortabschreibung). Pflicht §125 BAO ab 800 €.</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>Reisekosten</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleTravel" [(ngModel)]="settings.moduleTravel" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Reisekostenabrechnung §26 EStG: Diäten 26,40 €/Tag, Nächtigung 17 €/Nacht (Pauschale), KM-Geld 0,50 €/km. AT-Standardsätze als Auto-Helper.</clr-control-helper>
+      </clr-toggle-container>
+
+      <clr-toggle-container>
+        <label>Kassabuch</label>
+        <clr-toggle-wrapper>
+          <input type="checkbox" clrToggle name="moduleCashbook" [(ngModel)]="settings.moduleCashbook" />
+        </clr-toggle-wrapper>
+        <clr-control-helper>Chronologisches Journal von Bareinnahmen und -ausgaben mit laufendem Saldo. <strong>Nicht RKSV-konform</strong> — bei Bar-Umsätzen über 7.500 €/Jahr Registrierkasse Pflicht.</clr-control-helper>
+      </clr-toggle-container>    </form>
+  </ng-template>
+
+</app-edit-shell>

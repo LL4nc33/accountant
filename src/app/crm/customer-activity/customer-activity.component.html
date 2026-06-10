@@ -1,0 +1,165 @@
+<section class="cust-activity" *ngIf="!loading">
+
+  <!-- ─── Customer Lifetime Value ─── -->
+  <div class="cust-clv" *ngIf="invoiceCount > 0">
+    <div class="clv-card clv-total">
+      <div class="clv-label">Lifetime Value</div>
+      <div class="clv-value">{{ totalGross | number:'1.2-2':'de-AT' }} €</div>
+      <div class="clv-sub">{{ invoiceCount }} festgeschriebene Rechnungen</div>
+    </div>
+    <div class="clv-card clv-paid">
+      <div class="clv-label">Bezahlt</div>
+      <div class="clv-value">{{ paidGross | number:'1.2-2':'de-AT' }} €</div>
+    </div>
+    <div class="clv-card clv-open" *ngIf="openGross > 0.005">
+      <div class="clv-label">Außenstand</div>
+      <div class="clv-value">{{ openGross | number:'1.2-2':'de-AT' }} €</div>
+    </div>
+  </div>
+
+  <!-- ─── Activity-Timeline ─── -->
+  <div class="cust-block">
+    <div class="cust-block-head">
+      <h2>Aktivitäten <span class="cust-count">{{ notes.length }}</span></h2>
+    </div>
+
+    <form class="note-add" (ngSubmit)="addNote()">
+      <div class="note-add-row">
+        <select [(ngModel)]="draftNote.kind" name="kind" class="note-kind">
+          <option *ngFor="let k of noteKinds" [ngValue]="k">{{ noteKindLabel(k) }}</option>
+        </select>
+        <input type="date" [(ngModel)]="draftNote.occurredAt" name="occurredAt" class="note-date" />
+        <input type="text" [(ngModel)]="draftNote.title" name="title"
+          placeholder="Titel — z.B. Angebot besprochen"
+          class="note-title" maxlength="120" />
+        <button type="submit" class="btn btn-sm btn-primary" [disabled]="!draftNote.title.trim() || savingNote">
+          <cds-icon shape="plus"></cds-icon>
+          Hinzufügen
+        </button>
+      </div>
+      <textarea [(ngModel)]="draftNote.body" name="body" placeholder="Beschreibung (optional) …"
+        rows="2" class="note-body"></textarea>
+    </form>
+
+    <p class="muted" *ngIf="notes.length === 0">
+      Noch keine Aktivitäten erfasst — Notiz oder Telefonat oben anlegen.
+    </p>
+
+    <ul class="timeline" *ngIf="notes.length">
+      <li *ngFor="let n of notes" class="timeline-item" [class]="'kind-' + n.kind">
+        <div class="timeline-icon">
+          <cds-icon [attr.shape]="noteKindIcon(n.kind)" size="18"></cds-icon>
+        </div>
+        <div class="timeline-card">
+          <div class="timeline-head">
+            <span class="timeline-kind">{{ noteKindLabel(n.kind) }}</span>
+            <span class="timeline-date">{{ n.occurredAt | date:'EEEE, dd.MM.yyyy':'':'de-AT' }}</span>
+            <button class="btn btn-sm btn-link timeline-delete" (click)="deleteNote(n)" title="Löschen">
+              <cds-icon shape="trash" size="14"></cds-icon>
+            </button>
+          </div>
+          <div class="timeline-title">{{ n.title }}</div>
+          <div class="timeline-body" *ngIf="n.body">{{ n.body }}</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ─── Rechnungen ─── -->
+  <div class="cust-block">
+    <div class="cust-block-head">
+      <h2>Rechnungen <span class="cust-count">{{ invoices.length }}</span></h2>
+      <a class="btn btn-sm btn-outline" [routerLink]="['/om/invoice', 'new', 'edit']" [queryParams]="{customerId: customerId}">
+        <cds-icon shape="plus"></cds-icon>
+        Neue Rechnung
+      </a>
+    </div>
+    <p class="muted" *ngIf="invoices.length === 0">
+      Noch keine Rechnung für diesen Kunden geschrieben.
+    </p>
+    <table class="cust-table" *ngIf="invoices.length">
+      <thead>
+        <tr>
+          <th>Nr.</th>
+          <th>Datum</th>
+          <th class="right">Brutto</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inv of invoices" [routerLink]="['/om/invoice', inv.id]" class="clickable" [class.storno]="inv.isStorno">
+          <td>{{ inv.number }}<span *ngIf="inv.isStorno" class="storno-tag">Storno</span></td>
+          <td>{{ inv.date | date:'dd.MM.yyyy' }}</td>
+          <td class="right">{{ inv.gross | number:'1.2-2':'de-AT' }} €</td>
+          <td>
+            <span *ngIf="!inv.finalized" class="label" style="font-size:.7rem">Entwurf</span>
+            <span *ngIf="inv.finalized && !inv.paid" class="label label-warning" style="font-size:.7rem">Offen</span>
+            <span *ngIf="inv.paid" class="label label-success" style="font-size:.7rem">Bezahlt</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── Projekte ─── -->
+  <div class="cust-block" *ngIf="modules.projects$ | async">
+    <div class="cust-block-head">
+      <h2>Projekte <span class="cust-count">{{ projects.length }}</span></h2>
+      <a class="btn btn-sm btn-outline" [routerLink]="['/pm/project', 'new', 'edit']" [queryParams]="{customerId: customerId}">
+        <cds-icon shape="plus"></cds-icon>
+        Neues Projekt
+      </a>
+    </div>
+    <p class="muted" *ngIf="projects.length === 0">
+      Keine Projekte für diesen Kunden.
+    </p>
+    <table class="cust-table" *ngIf="projects.length">
+      <thead>
+        <tr>
+          <th>Projekt</th>
+          <th>Status</th>
+          <th class="right">Offene Stunden</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of projects" [routerLink]="['/pm/project', p.id]" class="clickable">
+          <td>{{ p.name }}</td>
+          <td>
+            <span class="label" [class.label-success]="p.status === 'active'" style="font-size:.7rem">
+              {{ p.status === 'active' ? 'Aktiv' : 'Geschlossen' }}
+            </span>
+          </td>
+          <td class="right">{{ p.openHours | number:'1.1-1':'de-AT' }} h</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── Produkte (nur wenn Module + Daten) ─── -->
+  <div class="cust-block" *ngIf="(modules.products$ | async) && products.length">
+    <div class="cust-block-head">
+      <h2>Gekaufte Produkte <span class="cust-count">{{ products.length }}</span></h2>
+    </div>
+    <table class="cust-table">
+      <thead>
+        <tr>
+          <th>Produkt</th>
+          <th class="right">Rechnungen</th>
+          <th class="right">Menge gesamt</th>
+          <th>Zuletzt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of products">
+          <td>{{ p.name }}</td>
+          <td class="right">{{ p.count }}</td>
+          <td class="right">{{ p.totalQty | number:'1.0-2':'de-AT' }}</td>
+          <td>{{ p.lastDate | date:'dd.MM.yyyy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
+<p class="muted cust-loading" *ngIf="loading">Lade Aktivität…</p>

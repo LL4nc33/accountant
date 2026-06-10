@@ -1,0 +1,49 @@
+<div *ngIf="entity">
+  <form #form="ngForm" clrForm clrLayout="horizontal">
+    <h3>{{ entity.numberRangeType }}</h3>
+    <!-- Updated to use translation key -->
+
+    <app-autofield
+      [field]="fields.nextSequenceValue"
+      [(entity)]="entity"
+    ></app-autofield>
+
+    <app-autofield
+      [field]="fields.format"
+      [(entity)]="entity"
+      [helperText]="helperText()"
+    ></app-autofield>
+
+    <clr-input-container>
+      <label>{{ "preview" | translate }}</label>
+      <!-- Updated to use translation key -->
+      <input
+        clrInput
+        type="text"
+        value="{{ renderPreview() }}"
+        style="width: 100%"
+        disabled
+      />
+    </clr-input-container>
+  </form>
+
+  <div cds-layout="align:right align:vertical-center">
+    <button
+      (click)="reset()"
+      type="button"
+      class="btn btn-icon btn-outline"
+      aria-label="cancel-edit-number-range"
+    >
+      <cds-icon shape="undo"></cds-icon>{{ "discardChanges" | translate }}
+    </button>
+    <button
+      (click)="save()"
+      [disabled]="!form?.form?.dirty || !form?.form?.valid"
+      type="button"
+      class="btn btn-icon btn-success"
+      aria-label="save-number-range"
+    >
+      <cds-icon shape="floppy"></cds-icon>{{ "saveChanges" | translate }}
+    </button>
+  </div>
+</div>

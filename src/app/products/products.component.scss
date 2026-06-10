@@ -1,0 +1,8 @@
+// Inherits layout from .content-area (Clarity-Default), nichts eigenes nötig.
+
+:host ::ng-deep .dg-right,
+:host ::ng-deep clr-dg-cell.dg-right,
+:host ::ng-deep clr-dg-column.dg-right .datagrid-column-title {
+  text-align: right;
+  justify-content: flex-end;
+}

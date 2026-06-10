@@ -1,0 +1,375 @@
+// Dashboard — "Editorial Daily" Aesthetic
+// Datum als Front-page-Headline (Georgia Italic, groß)
+// Eine dominante Kennzahl + zwei begleitende
+// Geometrie-Echo aus dem Login-Screen (decoy-teal, abstract)
+
+// Layout angleichen an pm-page / crm / om — Vollbreite + gleiche Page-Padding
+.dash-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: transparent !important;
+  flex-wrap: wrap;
+}
+.dash-title {
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: #111;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.dash-greeting {
+  font-size: 0.95rem;
+  color: #888;
+}
+.dash-greeting::before {
+  content: '·';
+  margin-right: 0.6rem;
+  color: #ccc;
+}
+
+.kpi-grid {
+  display: grid;
+  // auto-fill statt auto-fit: einzelne Cards stretchen nicht
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+  max-width: 1200px;
+}
+
+.dash-tabs {
+  margin-top: 0.5rem;
+  ::ng-deep .clr-tab-content {
+    padding-top: 1.25rem;
+  }
+}
+
+.dash {
+  padding: 1rem 2rem 4rem;
+}
+
+// ─── Onboarding-Banner ─────────────────────────────────
+// Zeigt sich nur solange CompanySettings unvollständig sind.
+// Bewusst dezent — kein Toast-Rot, kein erschreckender Alarm.
+.dash-onboarding {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.9rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background: #FFF6E0;
+  border-left: 4px solid #E6A700;
+  border-radius: 4px;
+
+  .dash-onb-text {
+    flex: 1;
+    line-height: 1.45;
+
+    strong {
+      display: block;
+      margin-bottom: 0.15rem;
+      color: #333;
+    }
+  }
+
+  .btn {
+    flex-shrink: 0;
+  }
+}
+
+// ─── HERO ───────────────────────────────────────────────
+
+.dash-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: end;
+  padding: 1rem 0 2rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid #E8E8E8;
+  overflow: hidden;
+}
+
+.dash-hero-text {
+  min-width: 0;
+}
+
+.dash-eyebrow {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #999999;
+  margin-bottom: 0.6rem;
+}
+
+.dash-date {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+  line-height: 1.05;
+  color: #1A1A1A !important;
+  margin: 0 0 0.75rem;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  letter-spacing: -0.01em;
+  text-transform: capitalize;
+}
+
+.dash-greeting {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.05rem;
+  color: #4A4A4A !important;
+  margin: 0;
+}
+
+// Geometrie-Echo: 4 überlappende, gedrehte, transluzente Quadrate
+// Inspiriert vom Clarity-Default-Login-Pattern, hier dezenter & kleiner
+.dash-hero-geo {
+  position: relative;
+  width: 200px;
+  height: 140px;
+  flex-shrink: 0;
+
+  .g {
+    position: absolute;
+    border-radius: 2px;
+    transform: rotate(45deg);
+    transform-origin: center;
+  }
+  .g1 { top:  -10px; right:  10px; width: 90px;  height: 90px;  background: rgba(99, 161, 167, 0.32); }
+  .g2 { top:   30px; right: -10px; width: 110px; height: 110px; background: rgba(155, 196, 200, 0.40); }
+  .g3 { top:   10px; right:  80px; width: 70px;  height: 70px;  background: rgba(208, 228, 230, 0.50); }
+  .g4 { top:   60px; right:  60px; width: 50px;  height: 50px;  background: rgba(75,  130, 137, 0.28); }
+}
+
+@media (max-width: 720px) {
+  .dash-hero-geo { display: none; }
+  .dash-hero { grid-template-columns: 1fr; }
+}
+
+// ─── STATS ──────────────────────────────────────────────
+
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #E8E8E8;
+}
+
+@media (max-width: 720px) {
+  .dash-stats { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+}
+
+.stat {
+  display: block;
+  text-decoration: none !important;
+  color: inherit;
+  border-left: 1px solid #E8E8E8;
+  padding-left: 1rem;
+  transition: border-color 0.2s ease;
+
+  &:first-child {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  &:hover {
+    border-left-color: #2F2F2F;
+    .stat-value { color: #000; }
+  }
+}
+
+.stat-label {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.66rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #999999;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  color: #1A1A1A;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.15rem;
+  transition: color 0.2s ease;
+  font-variant-numeric: tabular-nums;
+
+  .stat-unit {
+    font-size: 0.85rem;
+    color: #666666;
+    font-weight: 400;
+    margin-left: 0.15rem;
+  }
+}
+
+.stat-primary .stat-value {
+  font-size: 1.75rem;
+}
+
+.stat-value.negative {
+  color: var(--clr-color-error-700, #5D2E2E);
+}
+
+.stat-meta {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.85rem;
+  color: #666666;
+}
+
+// ─── BODY ───────────────────────────────────────────────
+
+.dash-body {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 3.5rem;
+}
+
+@media (max-width: 720px) {
+  .dash-body { grid-template-columns: 1fr; gap: 2rem; }
+}
+
+.dash-h {
+  font-family: system-ui, -apple-system, sans-serif !important;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0;
+  border-bottom: none !important;
+}
+
+// Letzte Rechnungen — Leaderboard-Liste, editorial, keine Karten
+.recent-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    border-bottom: 1px solid #E8E8E8;
+  }
+
+  a {
+    display: grid;
+    grid-template-columns: max-content 1fr max-content max-content;
+    gap: 1.2rem;
+    align-items: center;
+    padding: 0 0;
+    min-height: 3rem;
+    text-decoration: none;
+    color: inherit;
+    font-family: system-ui, -apple-system, sans-serif;
+    line-height: 1.4;
+    transition: background-color 0.15s ease, padding-left 0.15s ease;
+
+    &:hover {
+      background-color: #FAFAFA;
+      padding-left: 0.5rem;
+    }
+  }
+
+  .r-num {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    color: #666666;
+  }
+
+  .r-customer {
+    font-size: 0.95rem;
+    color: #1A1A1A;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    // Line-height etwas großzügiger — ohne das clipped overflow:hidden
+    // den Descender vom „g"/„p"/„q" am unteren Rand der Line-Box weg.
+    line-height: 1.4;
+  }
+
+  .r-date {
+    font-size: 0.85rem;
+    color: #999999;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .r-amount {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #2F2F2F;
+    text-align: right;
+    min-width: 5.5rem;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// Schnell handeln — Arrowed-Text-Liste, kein Button-Look
+.action-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    border-bottom: 1px solid #E8E8E8;
+  }
+
+  a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0;
+    min-height: 3rem;
+    text-decoration: none;
+    color: #1A1A1A;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.98rem;
+    line-height: 1.4;
+    transition: color 0.15s ease;
+
+    .arr {
+      font-family: Georgia, serif;
+      font-style: italic;
+      color: #999999;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    &:hover {
+      color: #000;
+      .arr {
+        transform: translateX(4px);
+        color: #2F2F2F;
+      }
+    }
+  }
+}
+
+// ─── Misc ───────────────────────────────────────────────
+
+.muted {
+  color: #999999;
+  font-style: italic;
+  a {
+    color: #2F2F2F;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: #CCCCCC;
+    &:hover { text-decoration-color: #2F2F2F; }
+  }
+}
+
+.dash-loading {
+  margin-top: 3rem;
+  text-align: center;
+}

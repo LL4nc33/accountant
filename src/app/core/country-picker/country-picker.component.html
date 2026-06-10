@@ -1,0 +1,12 @@
+<clr-select-container>
+  <label>{{ label }}</label>
+  <select clrSelect [ngModel]="value" (ngModelChange)="onSelect($event)" [disabled]="disabled">
+    <option value="">— bitte wählen —</option>
+    <optgroup label="EU">
+      <option *ngFor="let c of euCountries" [value]="c">{{ c }} — {{ countryName(c) }}</option>
+    </optgroup>
+    <optgroup label="Sonstige">
+      <option *ngFor="let c of nonEu" [value]="c">{{ c }} — {{ countryName(c) }}</option>
+    </optgroup>
+  </select>
+</clr-select-container>

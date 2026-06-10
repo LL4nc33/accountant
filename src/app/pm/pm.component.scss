@@ -1,0 +1,9 @@
+// Layout-Pattern: cds-layout Header-Row + <main>, gleich wie OM/CRM.
+// Keine eigene Page-Padding/MaxWidth — content-area liefert das.
+
+:host ::ng-deep .dg-right,
+:host ::ng-deep clr-dg-cell.dg-right,
+:host ::ng-deep clr-dg-column.dg-right .datagrid-column-title {
+  text-align: right;
+  justify-content: flex-end;
+}

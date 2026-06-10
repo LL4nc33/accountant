@@ -1,0 +1,21 @@
+<app-edit-shell title="Nummernkreise" subtitle="Pro Beleg-Typ und Stammsatz-Art ein Nummernkreis. Format-Templates mit Jahr und Padding bestimmen das Erscheinungsbild.">
+
+  <ng-template editTab="Belege">
+    <div cds-layout="vertical gap:xxl align:horizontal-stretch">
+      <app-number-range-edit
+        *ngFor="let numberRangeType of belegeTypes"
+        [numberRangeType]="numberRangeType"
+      ></app-number-range-edit>
+    </div>
+  </ng-template>
+
+  <ng-template editTab="Stammdaten">
+    <div cds-layout="vertical gap:xxl align:horizontal-stretch">
+      <app-number-range-edit
+        *ngFor="let numberRangeType of stammdatenTypes"
+        [numberRangeType]="numberRangeType"
+      ></app-number-range-edit>
+    </div>
+  </ng-template>
+
+</app-edit-shell>

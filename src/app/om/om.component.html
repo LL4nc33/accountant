@@ -1,0 +1,66 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>{{ "invoiceOverview" | translate }}</h1>
+  </div>
+  <div class="page-head-actions">
+    <clr-checkbox-wrapper>
+      <input type="checkbox" clrCheckbox name="onlyOpenInv"
+             [(ngModel)]="onlyOpen" (ngModelChange)="reload()" />
+      <label>Nur offene</label>
+    </clr-checkbox-wrapper>
+    <clr-checkbox-wrapper>
+      <input type="checkbox" clrCheckbox name="showArchivedInv"
+             [(ngModel)]="showArchived" (ngModelChange)="reload()" />
+      <label>Archivierte anzeigen</label>
+    </clr-checkbox-wrapper>
+    <button class="btn btn-primary" [routerLink]="['/om/invoice', 'new', 'edit']">
+      {{ "createInvoice" | translate }}
+    </button>
+  </div>
+</div>
+
+<main>
+  <clr-spinner *ngIf="loading">Lädt…</clr-spinner>
+
+  <app-empty-state
+    *ngIf="!loading && (!invoices || invoices.length === 0)"
+    icon="file"
+    title="Noch keine Rechnungen"
+    text="Erstelle eine neue Rechnung oder generiere eine aus offenen Projekt-Stunden."
+    ctaLabel="+ Neue Rechnung"
+    [ctaRouterLink]="['/om/invoice/new/edit']"
+  ></app-empty-state>
+
+  <clr-datagrid *ngIf="!loading && invoices && invoices.length > 0">
+    <clr-dg-column style="width: 140px" [clrDgField]="'invoiceNumber'">{{ "invoiceNumber" | translate }}</clr-dg-column>
+    <clr-dg-column style="width: 120px" [clrDgField]="'invoiceDate'" [(clrDgSortOrder)]="sortOrder">Datum</clr-dg-column>
+    <clr-dg-column>Kunde</clr-dg-column>
+    <clr-dg-column>{{ "subject" | translate }}</clr-dg-column>
+    <clr-dg-column style="width: 130px" class="dg-right">{{ "amount" | translate }}</clr-dg-column>
+    <clr-dg-column style="width: 130px">Status</clr-dg-column>
+
+    <clr-dg-row
+      *clrDgItems="let invoice of invoices"
+      [clrDgItem]="invoice"
+      (click)="openInvoice(invoice)"
+    >
+      <clr-dg-cell>{{ invoice.invoiceNumber || '—' }}</clr-dg-cell>
+      <clr-dg-cell>{{ invoice.invoiceDate | date : 'dd.MM.yyyy' }}</clr-dg-cell>
+      <clr-dg-cell>{{ customerNameById.get(invoice.customerId) || '—' }}</clr-dg-cell>
+      <clr-dg-cell>
+        {{ invoice.subject }}
+        <span *ngIf="invoice.archived" class="label" style="margin-left:.5rem;font-size:.7rem">Archiviert</span>
+      </clr-dg-cell>
+      <clr-dg-cell class="dg-right">{{ invoice.grossTotal | currency : 'EUR' : 'symbol' : '1.2-2' : 'de-AT' }}</clr-dg-cell>
+      <clr-dg-cell>
+        <span *ngIf="!invoice.finalized" class="label" style="font-size:.7rem">Entwurf</span>
+        <span *ngIf="invoice.finalized && !invoice.paid" class="label label-warning" style="font-size:.7rem">Offen</span>
+        <span *ngIf="invoice.paid" class="label label-success" style="font-size:.7rem">Bezahlt</span>
+      </clr-dg-cell>
+    </clr-dg-row>
+
+    <clr-dg-footer
+      >{{ invoices.length }} {{ "invoices" | translate }}</clr-dg-footer
+    >
+  </clr-datagrid>
+</main>

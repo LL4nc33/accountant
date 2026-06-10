@@ -1,0 +1,7 @@
+<div class="empty-state">
+  <cds-icon [attr.shape]="icon" size="64" class="empty-state-icon"></cds-icon>
+  <h3 class="empty-state-title">{{ title }}</h3>
+  <p class="empty-state-text">{{ text }}</p>
+  <a *ngIf="ctaRouterLink" class="btn btn-primary" [routerLink]="ctaRouterLink">{{ ctaLabel }}</a>
+  <button *ngIf="!ctaRouterLink && ctaLabel" class="btn btn-primary" type="button" (click)="ctaClick.emit()">{{ ctaLabel }}</button>
+</div>

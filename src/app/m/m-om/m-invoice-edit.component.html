@@ -1,0 +1,115 @@
+<p *ngIf="loading" class="m-muted">Lädt …</p>
+
+<form *ngIf="!loading" class="m-form" (ngSubmit)="save()">
+
+  <m-form-section title="Kunden- und Rechnungsdaten">
+    <label class="m-field">
+      <span>Kunde *</span>
+      <select name="customerId" [(ngModel)]="entity.customerId" (ngModelChange)="onCustomerChange()" required>
+        <option value="">— wählen —</option>
+        <option *ngFor="let c of customers" [value]="c.id">{{ c.label }}</option>
+      </select>
+    </label>
+    <label class="m-field">
+      <span>Anschrift (frei editierbar)</span>
+      <textarea name="address" [(ngModel)]="entity.address" rows="4" placeholder="Wird bei Kunden-Wahl autobefüllt"></textarea>
+    </label>
+    <label class="m-field">
+      <span>Betreff</span>
+      <input type="text" name="subject" [(ngModel)]="entity.subject" />
+    </label>
+    <label class="m-field">
+      <span>Rechnungsdatum</span>
+      <input type="date" name="dateStr" [(ngModel)]="dateStr" />
+    </label>
+    <label class="m-field">
+      <input type="checkbox" name="reverseCharge" [(ngModel)]="entity.reverseCharge" /> Reverse-Charge / Drittland
+    </label>
+    <label class="m-field" *ngIf="entity.reverseCharge">
+      <span>Empfänger-UID</span>
+      <input type="text" name="recipientVatId" [(ngModel)]="entity.recipientVatId" placeholder="z.B. ATU12345678" />
+    </label>
+    <label class="m-field">
+      <span>Zahlungsziel (Tage)</span>
+      <input type="number" name="paymentTermsDays" [(ngModel)]="entity.paymentTermsDays" inputmode="numeric" />
+    </label>
+    <label class="m-field">
+      <span>Skonto-Satz (%) — 0 = kein Skonto</span>
+      <input type="number" step="0.1" name="skontoPercent" [(ngModel)]="entity.skontoPercent" inputmode="decimal" />
+    </label>
+    <label class="m-field" *ngIf="entity.skontoPercent && entity.skontoPercent > 0">
+      <span>Skonto-Frist (Tage)</span>
+      <input type="number" name="skontoDays" [(ngModel)]="entity.skontoDays" inputmode="numeric" />
+    </label>
+  </m-form-section>
+
+  <m-form-section title="Positionen ({{ items.length }})" subtitle="Tap auf eine Position zum Bearbeiten">
+    <m-card *ngFor="let it of items; let idx = index" (click)="openItem(it)" style="cursor: pointer">
+      <div card-head>
+        <span>{{ idx + 1 }}. {{ it.name }}</span>
+        <span>{{ (it.quantity * it.price) | number:'1.2-2':'de-AT' }} €</span>
+      </div>
+      <div card-body>
+        <span>{{ it.quantity | number:'1.0-2':'de-AT' }} × {{ it.price | number:'1.2-2':'de-AT' }} €</span>
+        <span>{{ it.vat }}%</span>
+      </div>
+    </m-card>
+    <p *ngIf="!items.length" class="m-muted-small">Noch keine Position.</p>
+    <button type="button" class="m-pill m-pill-primary" (click)="openNewItem()">+ Position hinzufügen</button>
+  </m-form-section>
+
+  <m-form-section title="Texte" *ngIf="!loading">
+    <label class="m-field">
+      <span>Kopf-Text</span>
+      <textarea name="headerText" [(ngModel)]="entity.headerText" rows="3"></textarea>
+    </label>
+    <label class="m-field">
+      <span>Fuß-Text</span>
+      <textarea name="footerText" [(ngModel)]="entity.footerText" rows="3"></textarea>
+    </label>
+  </m-form-section>
+
+  <m-form-section title="Summen">
+    <dl class="m-kv">
+      <dt>Netto</dt><dd>{{ netTotal | number:'1.2-2':'de-AT' }} €</dd>
+      <dt>Brutto</dt><dd>{{ grossTotal | number:'1.2-2':'de-AT' }} €</dd>
+    </dl>
+  </m-form-section>
+
+  <div class="m-form-actions">
+    <button type="button" class="m-pill" (click)="cancel()">Abbrechen</button>
+    <button type="submit" class="m-pill m-pill-primary" [disabled]="saving">{{ saving ? 'Speichert…' : 'Speichern' }}</button>
+  </div>
+
+</form>
+
+<!-- Item-Modal -->
+<m-form-modal [(open)]="showItemModal" [title]="editingIsNew ? 'Neue Position' : 'Position bearbeiten'">
+  <ng-container *ngIf="editingItem">
+    <label class="m-field">
+      <span>Bezeichnung *</span>
+      <input type="text" name="iname" [(ngModel)]="editingItem.name" />
+    </label>
+    <label class="m-field">
+      <span>Beschreibung</span>
+      <textarea name="idesc" [(ngModel)]="editingItem.description" rows="2"></textarea>
+    </label>
+    <label class="m-field">
+      <span>Menge</span>
+      <input type="number" step="0.25" name="iqty" [(ngModel)]="editingItem.quantity" inputmode="decimal" />
+    </label>
+    <label class="m-field">
+      <span>Einzelpreis netto (€)</span>
+      <input type="number" step="0.01" name="iprice" [(ngModel)]="editingItem.price" inputmode="decimal" />
+    </label>
+    <label class="m-field">
+      <span>USt (%)</span>
+      <input type="number" step="0.5" name="ivat" [(ngModel)]="editingItem.vat" inputmode="decimal" />
+    </label>
+  </ng-container>
+  <div modal-foot>
+    <button class="m-pill" (click)="showItemModal = false">Abbrechen</button>
+    <button *ngIf="!editingIsNew" class="m-pill m-pill-warning" (click)="deleteItem(editingItem!)">Löschen</button>
+    <button class="m-pill m-pill-primary" (click)="saveItem()">Übernehmen</button>
+  </div>
+</m-form-modal>

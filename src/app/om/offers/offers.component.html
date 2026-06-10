@@ -1,0 +1,89 @@
+<div class="page-head">
+  <div class="page-head-text">
+    <h1>Angebote</h1>
+  </div>
+  <div class="page-head-actions">
+    <a routerLink="/om/offer/new/edit" class="btn btn-primary">
+      <cds-icon shape="plus"></cds-icon> Neues Angebot
+    </a>
+  </div>
+</div>
+
+<main>
+  <section class="filters">
+    <label>
+      Status
+      <select [(ngModel)]="filterStatus">
+        <option value="">Alle</option>
+        <option value="draft">Entwurf</option>
+        <option value="sent">Versendet</option>
+        <option value="won">Angenommen</option>
+        <option value="lost">Abgelehnt</option>
+        <option value="expired">Abgelaufen</option>
+      </select>
+    </label>
+    <label>
+      <input type="checkbox" [(ngModel)]="showArchived" />
+      Archivierte anzeigen
+    </label>
+  </section>
+
+  <p *ngIf="loading">Lade Angebote…</p>
+  <p *ngIf="!loading && !filteredOffers.length" class="empty">
+    Keine Angebote gefunden. Lege ein neues an oder ändere den Status-Filter.
+  </p>
+
+  <table *ngIf="!loading && filteredOffers.length" class="offers-table">
+    <thead>
+      <tr>
+        <th>Nr.</th>
+        <th>Datum</th>
+        <th>Gültig / Termin</th>
+        <th>Typ</th>
+        <th>Kunde</th>
+        <th>Betreff</th>
+        <th class="num">Netto</th>
+        <th class="num">Brutto</th>
+        <th>Status</th>
+        <th class="actions">Aktionen</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let o of filteredOffers" [class.archived]="o.archived">
+        <td><a [routerLink]="['/om/offer', o.id, 'edit']">{{ o.offerNumber }}</a></td>
+        <td>{{ fmtDate(o.offerDate) }}</td>
+        <td>{{ fmtDate((o.kind ?? 'offer') === 'offer' ? o.validUntil : o.deliveryDate) }}</td>
+        <td>{{ kindShort(o.kind) }}</td>
+        <td>{{ customerName(o) }}</td>
+        <td>{{ o.subject || '—' }}</td>
+        <td class="num">{{ fmt(o.netTotal) }} €</td>
+        <td class="num">{{ fmt(o.grossTotal) }} €</td>
+        <td><span class="status-pill" [ngClass]="statusClass(o.status)">{{ statusLabel(o.status) }}</span></td>
+        <td class="actions">
+          <button class="btn btn-sm btn-link" (click)="openPdf(o)" title="PDF öffnen">
+            <cds-icon shape="file-pdf"></cds-icon>
+          </button>
+          <button class="btn btn-sm btn-link" *ngIf="o.status === 'draft'"
+            (click)="setStatus(o, 'sent')" title="Als versendet markieren">
+            <cds-icon shape="envelope"></cds-icon>
+          </button>
+          <button class="btn btn-sm btn-link"
+            *ngIf="o.status === 'sent' || o.status === 'draft'"
+            (click)="convert(o)" title="In Rechnung umwandeln">
+            <cds-icon shape="step-forward-2"></cds-icon>
+          </button>
+          <button class="btn btn-sm btn-link" *ngIf="o.status === 'won' && o.convertedInvoiceId"
+            [routerLink]="['/om/invoice', o.convertedInvoiceId]"
+            title="Zur Rechnung">
+            <cds-icon shape="link"></cds-icon>
+          </button>
+          <button class="btn btn-sm btn-link"
+            *ngIf="o.status === 'sent'"
+            (click)="setStatus(o, 'lost')" title="Abgelehnt">
+            <cds-icon shape="times"></cds-icon>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</main>

@@ -1,0 +1,15 @@
+<div class="main-container" *ngIf="authService.isAuthenticated() && !isLoginRoute && !isMobileRoute">
+  <clr-alert *ngIf="showDefaultPwBanner" clrAlertType="warning" [clrAlertClosable]="false">
+    <clr-alert-item>
+      <span class="alert-text">
+        Du verwendest noch das Default-Passwort <b>admin / admin</b>.
+        <a routerLink="/change-password">Jetzt ändern →</a>
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <app-navigation class="content-container"></app-navigation>
+</div>
+
+<div *ngIf="!authService.isAuthenticated() || isLoginRoute || isMobileRoute">
+  <router-outlet />
+</div>

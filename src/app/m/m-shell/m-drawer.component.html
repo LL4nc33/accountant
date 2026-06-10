@@ -1,0 +1,154 @@
+<div class="m-drawer-overlay" [class.open]="open" (click)="close()"></div>
+
+<aside class="m-drawer" [class.open]="open" role="navigation" aria-label="Hauptmenü">
+
+  <a routerLink="/m" class="m-drawer-brand">
+    <cds-icon shape="book" size="20" class="m-drawer-brand-icon"></cds-icon>
+    <span>accountant</span>
+  </a>
+
+  <nav class="m-drawer-nav">
+    <a routerLink="/m" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="m-drawer-link">
+      <cds-icon shape="home" size="20"></cds-icon> Dashboard
+    </a>
+
+    <button class="m-drawer-group-head" (click)="toggleGroup('customers')" [class.expanded]="expandedGroup === 'customers'">
+      <cds-icon shape="users" size="20"></cds-icon>
+      <span>Kunden</span>
+      <cds-icon shape="angle" [attr.direction]="expandedGroup === 'customers' ? 'up' : 'down'" size="14"></cds-icon>
+    </button>
+    <div class="m-drawer-group" *ngIf="expandedGroup === 'customers'">
+      <a routerLink="/m/customers" routerLinkActive="active" class="m-drawer-sublink">Übersicht</a>
+      <a routerLink="/m/customer/new-person/edit" routerLinkActive="active" class="m-drawer-sublink">Neue Person</a>
+      <a routerLink="/m/customer/new-company/edit" routerLinkActive="active" class="m-drawer-sublink">Neue Firma</a>
+    </div>
+
+    <ng-container *ngIf="modules.projects$ | async">
+      <button class="m-drawer-group-head" (click)="toggleGroup('projects')" [class.expanded]="expandedGroup === 'projects'">
+        <cds-icon shape="briefcase" size="20"></cds-icon>
+        <span>Projekte</span>
+        <cds-icon shape="angle" [attr.direction]="expandedGroup === 'projects' ? 'up' : 'down'" size="14"></cds-icon>
+      </button>
+      <div class="m-drawer-group" *ngIf="expandedGroup === 'projects'">
+        <a routerLink="/m/projects" routerLinkActive="active" class="m-drawer-sublink">Übersicht</a>
+        <a routerLink="/m/time-entries" routerLinkActive="active" class="m-drawer-sublink">Zeitbuchungen</a>
+        <a routerLink="/m/work-time" routerLinkActive="active" class="m-drawer-sublink" *ngIf="modules.workHours$ | async">Arbeitszeit</a>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="modules.products$ | async">
+      <a routerLink="/m/products" routerLinkActive="active" class="m-drawer-link">
+        <cds-icon shape="tags" size="20"></cds-icon> Produkte
+      </a>
+    </ng-container>
+
+    <ng-container *ngIf="modules.expenses$ | async">
+      <a routerLink="/m/expenses" routerLinkActive="active" class="m-drawer-link">
+        <cds-icon shape="wallet" size="20"></cds-icon> Ausgaben
+      </a>
+    </ng-container>
+
+    <ng-container *ngIf="modules.llm$ | async">
+      <a routerLink="/m/chat" routerLinkActive="active" class="m-drawer-link">
+        <cds-icon shape="chat-bubble" size="20"></cds-icon> KI-Assistent
+      </a>
+    </ng-container>
+
+    <button class="m-drawer-group-head" (click)="toggleGroup('invoices')" [class.expanded]="expandedGroup === 'invoices'">
+      <cds-icon shape="file-group" size="20"></cds-icon>
+      <span>Rechnungen</span>
+      <cds-icon shape="angle" [attr.direction]="expandedGroup === 'invoices' ? 'up' : 'down'" size="14"></cds-icon>
+    </button>
+    <div class="m-drawer-group" *ngIf="expandedGroup === 'invoices'">
+      <a routerLink="/m/invoices" routerLinkActive="active" class="m-drawer-sublink">Übersicht</a>
+      <a routerLink="/m/invoice/new/edit" routerLinkActive="active" class="m-drawer-sublink">Neue Rechnung</a>
+      <a routerLink="/m/offers" routerLinkActive="active" class="m-drawer-sublink">Angebote</a>
+      <a routerLink="/m/recurring" routerLinkActive="active" class="m-drawer-sublink">Wiederkehrend</a>
+      <a *ngIf="modules.reminder$ | async" routerLink="/m/reminders" routerLinkActive="active" class="m-drawer-sublink">Mahnungen</a>
+    </div>
+
+    <!-- Buchhaltung — Daten-Module -->
+    <ng-container *ngIf="(modules.assets$ | async) || (modules.travel$ | async) || (modules.cashbook$ | async) || isAdmin">
+      <button class="m-drawer-group-head" (click)="toggleGroup('accounting')" [class.expanded]="expandedGroup === 'accounting'">
+        <cds-icon shape="bank" size="20"></cds-icon>
+        <span>Buchhaltung</span>
+        <cds-icon shape="angle" [attr.direction]="expandedGroup === 'accounting' ? 'up' : 'down'" size="14"></cds-icon>
+      </button>
+      <div class="m-drawer-group" *ngIf="expandedGroup === 'accounting'">
+        <a routerLink="/m/assets" routerLinkActive="active" class="m-drawer-sublink" *ngIf="modules.assets$ | async">Anlagen</a>
+        <a routerLink="/m/travel" routerLinkActive="active" class="m-drawer-sublink" *ngIf="modules.travel$ | async">Reisekosten</a>
+        <a routerLink="/m/cashbook" routerLinkActive="active" class="m-drawer-sublink" *ngIf="modules.cashbook$ | async">Kassabuch</a>
+        <a routerLink="/m/bank/abgleich" routerLinkActive="active" class="m-drawer-sublink" *ngIf="isAdmin">Bank-Abgleich</a>
+      </div>
+    </ng-container>
+
+    <!-- Steuer — Finanzamt-Meldungen + Forecasts -->
+    <ng-container *ngIf="isAdmin">
+      <button class="m-drawer-group-head" (click)="toggleGroup('tax')" [class.expanded]="expandedGroup === 'tax'">
+        <cds-icon shape="form" size="20"></cds-icon>
+        <span>Steuer</span>
+        <cds-icon shape="angle" [attr.direction]="expandedGroup === 'tax' ? 'up' : 'down'" size="14"></cds-icon>
+      </button>
+      <div class="m-drawer-group" *ngIf="expandedGroup === 'tax'">
+        <a routerLink="/m/at-tax/uva" routerLinkActive="active" class="m-drawer-sublink">USt-Voranmeldung</a>
+        <a routerLink="/m/at-tax/zm" routerLinkActive="active" class="m-drawer-sublink">Zusammenfassende Meldung</a>
+        <a routerLink="/m/svs" routerLinkActive="active" class="m-drawer-sublink" *ngIf="modules.svs$ | async">SVS-Vorschau</a>
+        <a routerLink="/m/est" routerLinkActive="active" class="m-drawer-sublink" *ngIf="modules.est$ | async">ESt-Vorschau</a>
+        <a routerLink="/m/at-tax/bmd-export" routerLinkActive="active" class="m-drawer-sublink">BMD / RZL-Export</a>
+        <a routerLink="/m/admin/tax-export" routerLinkActive="active" class="m-drawer-sublink">Finanzamt-Export</a>
+      </div>
+    </ng-container>
+  </nav>
+
+  <div class="m-drawer-spacer"></div>
+
+  <nav class="m-drawer-bottom">
+    <!-- Einstellungen — Stammdaten -->
+    <button class="m-drawer-group-head" (click)="toggleGroup('settings')" [class.expanded]="expandedGroup === 'settings'">
+      <cds-icon shape="cog" size="20"></cds-icon>
+      <span>Einstellungen</span>
+      <cds-icon shape="angle" [attr.direction]="expandedGroup === 'settings' ? 'up' : 'down'" size="14"></cds-icon>
+    </button>
+    <div class="m-drawer-group" *ngIf="expandedGroup === 'settings'">
+      <a routerLink="/m/settings/company" routerLinkActive="active" class="m-drawer-sublink">Firma</a>
+      <a routerLink="/m/settings/module" routerLinkActive="active" class="m-drawer-sublink">Module</a>
+      <a routerLink="/m/settings/number-ranges" routerLinkActive="active" class="m-drawer-sublink">Nummernkreise</a>
+    </div>
+
+    <!-- System — Admin-Tools -->
+    <ng-container *ngIf="isAdmin">
+      <button class="m-drawer-group-head" (click)="toggleGroup('system')" [class.expanded]="expandedGroup === 'system'">
+        <cds-icon shape="cluster" size="20"></cds-icon>
+        <span>System</span>
+        <cds-icon shape="angle" [attr.direction]="expandedGroup === 'system' ? 'up' : 'down'" size="14"></cds-icon>
+      </button>
+      <div class="m-drawer-group" *ngIf="expandedGroup === 'system'">
+        <a routerLink="/m/admin/audit-log" routerLinkActive="active" class="m-drawer-sublink">Audit-Log</a>
+        <a routerLink="/m/admin/backups" routerLinkActive="active" class="m-drawer-sublink">Backups</a>
+      </div>
+    </ng-container>
+
+    <!-- Konto -->
+    <button class="m-drawer-group-head" (click)="toggleGroup('account')" [class.expanded]="expandedGroup === 'account'">
+      <cds-icon shape="user" size="20"></cds-icon>
+      <span>Konto</span>
+      <cds-icon shape="angle" [attr.direction]="expandedGroup === 'account' ? 'up' : 'down'" size="14"></cds-icon>
+    </button>
+    <div class="m-drawer-group" *ngIf="expandedGroup === 'account'">
+      <a routerLink="/m/change-password" routerLinkActive="active" class="m-drawer-sublink">Passwort ändern</a>
+      <a routerLink="/m/about" routerLinkActive="active" class="m-drawer-sublink">Über</a>
+    </div>
+
+    <button class="m-drawer-link" (click)="forceDesktop()" aria-label="Auf Desktop-Ansicht wechseln">
+      <cds-icon shape="display" size="20"></cds-icon> Desktop-Ansicht
+    </button>
+
+    <div class="m-drawer-user">
+      <cds-icon shape="user" size="16"></cds-icon>
+      <span class="m-drawer-user-name">{{ userName || '—' }}</span>
+      <button class="m-drawer-logout" (click)="logout($event)" aria-label="Ausloggen">
+        <cds-icon shape="logout" size="14"></cds-icon>
+      </button>
+    </div>
+  </nav>
+</aside>

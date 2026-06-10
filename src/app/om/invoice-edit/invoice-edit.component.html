@@ -1,0 +1,235 @@
+<ng-container *ngIf="entity">
+  <clr-alert *ngIf="entity.finalized" clrAlertType="warning" [clrAlertClosable]="false">
+    <clr-alert-item>
+      <span class="alert-text">
+        <strong>Diese Rechnung ist festgeschrieben (§131 BAO)</strong> —
+        sie ist unveränderlich. Speichern ist deaktiviert. Für Korrekturen
+        lege eine Storno- oder Korrektur-Rechnung an.
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>{{ (entity.id ? "editInvoice" : "createInvoice") | translate }}</h1>
+    </div>
+    <div class="page-head-actions">
+      <a class="btn btn-outline"
+         [routerLink]="entity.id ? ['/om/invoice', entity.id.toString()] : ['/om/invoice']">
+        {{ (entity.id ? "discardChanges" : "cancel") | translate }}
+      </a>
+      <button
+        (click)="saveChanges()"
+        [disabled]="form?.form?.invalid"
+        type="button"
+        class="btn btn-primary"
+      >
+        {{ (entity.id ? "saveChanges" : "createInvoice") | translate }}
+      </button>
+    </div>
+  </div>
+
+  <main>
+    <form #form="ngForm" clrForm clrLayout="horizontal">
+      <h3>{{ "contactAndBillingInfo" | translate }}</h3>
+
+      <clr-combobox-container>
+        <label>Kunde</label>
+        <clr-combobox
+          name="customerPicker"
+          [ngModel]="selectedCustomer"
+          (ngModelChange)="onCustomerSelected($event)"
+          placeholder="Kunde wählen…"
+        >
+          <clr-options>
+            <clr-option
+              *clrOptionItems="let c of customers; field: 'label'"
+              [clrValue]="c"
+            >
+              {{ c.label }}
+            </clr-option>
+          </clr-options>
+        </clr-combobox>
+        <clr-control-helper
+          >Wähle einen bestehenden Kunden; Adresse wird automatisch
+          befüllt</clr-control-helper
+        >
+      </clr-combobox-container>
+
+      <clr-textarea-container>
+        <label>Anschrift (frei editierbar)</label>
+        <textarea
+          clrTextarea
+          name="address"
+          [(ngModel)]="entity.address"
+          rows="5"
+          style="width: 350px"
+          placeholder="Wird beim Kunden-Wählen automatisch befüllt"
+        ></textarea>
+      </clr-textarea-container>
+      <app-autofield
+        [field]="fields.subject"
+        width="700px"
+        [(entity)]="entity"
+      ></app-autofield>
+      <app-autofield
+        [field]="fields.invoiceNumber"
+        width="150px"
+        [(entity)]="entity"
+        [placeholder]="previewInvoiceNumber"
+      ></app-autofield>
+
+      <app-autofield
+        [field]="fields.invoiceDate"
+        width="400px"
+        [(entity)]="entity"
+      ></app-autofield>
+
+      <clr-date-container>
+        <label>Leistungsdatum von (optional)</label>
+        <input type="date" clrDate name="performanceDateFrom" [(clrDate)]="performanceDateFrom" />
+        <clr-control-helper
+          >Tag der erbrachten Leistung. Leer → wird im PDF auf
+          Rechnungsdatum zurückgesetzt.</clr-control-helper
+        >
+      </clr-date-container>
+
+      <clr-date-container>
+        <label>Leistungsdatum bis (optional)</label>
+        <input type="date" clrDate name="performanceDateTo" [(clrDate)]="performanceDateTo" />
+        <clr-control-helper
+          >Wenn gesetzt: rendert „Leistungszeitraum: von – bis"</clr-control-helper
+        >
+      </clr-date-container>
+
+      <clr-checkbox-container>
+        <clr-checkbox-wrapper>
+          <input type="checkbox" clrCheckbox name="reverseCharge" [(ngModel)]="entity!.reverseCharge" />
+          <label>Reverse-Charge / Drittland (kein USt am Beleg)</label>
+        </clr-checkbox-wrapper>
+        <clr-control-helper
+          >Aktivieren bei B2B-Leistungen ins EU-Ausland (UID des Empfängers
+          erforderlich) oder Drittland. Auto-Vorschlag erscheint wenn Kunde
+          im anderen Land mit UID.</clr-control-helper
+        >
+      </clr-checkbox-container>
+
+      <clr-input-container>
+        <label>Empfänger UID</label>
+        <input clrInput name="recipientVatId" [(ngModel)]="entity!.recipientVatId" placeholder="z.B. ATU12345678" />
+        <clr-control-helper
+          >Format z.B. ATU12345678 (AT), DE123456789 (DE). Bei
+          Reverse-Charge Pflicht (§11 UStG).</clr-control-helper
+        >
+      </clr-input-container>
+
+      <clr-alert *ngIf="rcSuggestion" clrAlertType="info" [clrAlertClosable]="false">
+        <clr-alert-item>
+          <span class="alert-text">{{ rcSuggestion }}</span>
+          <div class="alert-actions">
+            <button class="btn btn-sm btn-primary" (click)="acceptRcSuggestion()">Als Reverse-Charge buchen</button>
+            <button class="btn btn-sm btn-outline" (click)="rcSuggestion = ''">Nein, lassen</button>
+          </div>
+        </clr-alert-item>
+      </clr-alert>
+
+      <app-autofield
+        [field]="fields.reference"
+        width="300px"
+        [(entity)]="entity"
+      ></app-autofield>
+
+      <h3>Zahlung + Skonto</h3>
+      <div class="payment-grid">
+        <clr-number-input-container>
+          <label>Zahlungsziel (Tage)</label>
+          <input clrNumberInput type="number" step="1" min="0" name="paymentTermsDays" [(ngModel)]="entity!.paymentTermsDays" />
+        </clr-number-input-container>
+        <clr-number-input-container>
+          <label>Skonto-Satz (%)</label>
+          <input clrNumberInput type="number" step="0.1" min="0" max="100" name="skontoPercent" [(ngModel)]="entity!.skontoPercent" />
+          <clr-control-helper>0 = kein Skonto</clr-control-helper>
+        </clr-number-input-container>
+        <clr-number-input-container *ngIf="entity!.skontoPercent && entity!.skontoPercent > 0">
+          <label>Skonto-Frist (Tage)</label>
+          <input clrNumberInput type="number" step="1" min="0" name="skontoDays" [(ngModel)]="entity!.skontoDays" />
+        </clr-number-input-container>
+      </div>
+
+      <h3>{{ "headerText" | translate }}</h3>
+      <app-autofield
+        [field]="fields.headerText"
+        rows="5"
+        [(entity)]="entity"
+      ></app-autofield>
+
+      <h3>{{ "products" | translate }}</h3>
+
+      <div class="btn-group">
+        <div class="radio btn">
+          <input
+            type="radio"
+            name="btn-group-demo-radios"
+            id="btn-demo-radio-1"
+            (click)="setVatType('Netto')"
+            [checked]="entity.vatType === 'Netto'"
+          />
+          <label for="btn-demo-radio-1">Netto</label>
+        </div>
+        <div class="radio btn">
+          <input
+            type="radio"
+            name="btn-group-demo-radios"
+            id="btn-demo-radio-2"
+            (click)="setVatType('Brutto')"
+            [checked]="entity.vatType === 'Brutto'"
+          />
+          <label for="btn-demo-radio-2">Brutto</label>
+        </div>
+      </div>
+
+      <div class="invoice-items-list">
+        <app-invoice-item-edit
+          *ngFor="let item of entity.items"
+          [item]="item"
+          [parent]="instance"
+        ></app-invoice-item-edit>
+
+        <div *ngIf="!entity.items || entity.items.length === 0" class="empty-state">
+          <p>Noch keine Positionen. Klick auf „+ Position hinzufügen" um zu beginnen.</p>
+        </div>
+      </div>
+
+      <div class="invoice-totals" *ngIf="entity.items && entity.items.length > 0">
+        <div class="total-row">
+          <span class="label">Netto:</span>
+          <span class="value">{{ entity.netTotal | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</span>
+        </div>
+        <div class="total-row" *ngFor="let vat of entity.vatTotals">
+          <span class="label">USt {{ vat.vat }}%:</span>
+          <span class="value">{{ vat.total | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</span>
+        </div>
+        <div class="total-row brutto">
+          <span class="label">Brutto:</span>
+          <span class="value">{{ entity.grossTotal | currency:'EUR':'symbol':'1.2-2':'de-AT' }}</span>
+        </div>
+      </div>
+
+      <button
+        cds-layout="m-t:md"
+        (click)="createRelationItem('items')"
+        type="button"
+        class="btn btn-outline"
+        aria-label="add-item"
+      >
+        <cds-icon shape="plus"></cds-icon>
+        {{ "addInvoicePosition" | translate }}
+      </button>
+      <h3>{{ "footerText" | translate }}</h3>
+      <app-autofield
+        [field]="fields.footerText"
+        [(entity)]="entity"
+        rows="5"
+      ></app-autofield>
+    </form>
+  </main>
+</ng-container>
